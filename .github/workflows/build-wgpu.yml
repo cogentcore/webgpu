@@ -1,0 +1,222 @@
+name: Build wgpu-native
+
+on:
+  workflow_dispatch:
+
+env:
+  ANDROID_MIN_SDK: "21"
+
+jobs:
+  build-wgpu:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    env:
+      CARGO_BUILD_TARGET: ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: build - linux/amd64
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            goos: linux
+            goarch: amd64
+
+          - name: build - windows/amd64
+            os: windows-2022
+            target: x86_64-pc-windows-gnu
+            goos: windows
+            goarch: amd64
+            setup_env: |
+              choco install -y --force llvm | exit 0
+              echo "LIBCLANG_PATH=C:\Program Files\LLVM\lib" >> $GITHUB_ENV
+
+          - name: build - darwin/amd64
+            os: macos-13
+            target: x86_64-apple-darwin
+            goos: darwin
+            goarch: amd64
+
+          - name: build - darwin/arm64
+            os: macos-14
+            target: aarch64-apple-darwin
+            goos: darwin
+            goarch: arm64
+
+          - name: build - ios/amd64
+            os: macos-13
+            target: x86_64-apple-ios
+            goos: ios
+            goarch: amd64
+
+          - name: build - ios/arm64
+            os: macos-14
+            target: aarch64-apple-ios
+            goos: ios
+            goarch: arm64
+
+          - name: build - android/amd64
+            os: ubuntu-22.04
+            target: x86_64-linux-android
+            goos: android
+            goarch: amd64
+            setup_env: |
+              set -x
+              export CC=$ANDROID_NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android$ANDROID_MIN_SDK-clang
+
+              echo "CC=$CC" >> $GITHUB_ENV
+              echo "CXX=$CC++" >> $GITHUB_ENV
+              echo "CLANG_PATH=$CC" >> $GITHUB_ENV
+              echo "CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER=$CC" >> $GITHUB_ENV
+
+          - name: build - android/386
+            os: ubuntu-22.04
+            target: i686-linux-android
+            goos: android
+            goarch: '386'
+            setup_env: |
+              set -x
+              export CC=$ANDROID_NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android$ANDROID_MIN_SDK-clang
+
+              echo "CC=$CC" >> $GITHUB_ENV
+              echo "CXX=$CC++" >> $GITHUB_ENV
+              echo "CLANG_PATH=$CC" >> $GITHUB_ENV
+              echo "CARGO_TARGET_I686_LINUX_ANDROID_LINKER=$CC" >> $GITHUB_ENV
+
+          - name: build - android/arm64
+            os: ubuntu-22.04
+            target: aarch64-linux-android
+            goos: android
+            goarch: arm64
+            setup_env: |
+              set -x
+              export CC=$ANDROID_NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android$ANDROID_MIN_SDK-clang
+
+              echo "CC=$CC" >> $GITHUB_ENV
+              echo "CXX=$CC++" >> $GITHUB_ENV
+              echo "CLANG_PATH=$CC" >> $GITHUB_ENV
+              echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$CC" >> $GITHUB_ENV
+
+          - name: build - android/arm
+            os: ubuntu-22.04
+            target: armv7-linux-androideabi
+            goos: android
+            goarch: arm
+            setup_env: |
+              set -x
+              export CC=$ANDROID_NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi$ANDROID_MIN_SDK-clang
+
+              echo "CC=$CC" >> $GITHUB_ENV
+              echo "CXX=$CC++" >> $GITHUB_ENV
+              echo "CLANG_PATH=$CC" >> $GITHUB_ENV
+              echo "CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=$CC" >> $GITHUB_ENV
+
+    steps:
+      # Checkout
+      - uses: actions/checkout@v3
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          target: ${{ matrix.target }}
+
+      - if: ${{ matrix.goos == 'android' }}
+        name: Setup Android NDK
+        shell: bash
+        run: |
+          set -ex
+          mkdir -p /tmp/go-webgpu-ndk/
+          cd /tmp/go-webgpu-ndk/
+
+          # ndkVersion "25.2.9519653"
+          curl -LO https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+
+          unzip android-ndk-r25c-linux.zip
+          rm android-ndk-r25c-linux.zip
+          export ANDROID_NDK_PATH=$PWD/android-ndk-r25c
+
+          echo "ANDROID_NDK_PATH=$ANDROID_NDK_PATH" >> $GITHUB_ENV
+          echo "LIBCLANG_PATH=$ANDROID_NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/lib64/libclang.so.13" >> $GITHUB_ENV
+          echo "LLVM_CONFIG_PATH=$ANDROID_NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-config" >> $GITHUB_ENV
+          echo "BINDGEN_EXTRA_CLANG_ARGS='-isysroot $ANDROID_NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/sysroot'" >> $GITHUB_ENV
+
+      - name: Setup Environment
+        shell: bash
+        run: ${{ matrix.setup_env }}
+
+      - name: Build
+        shell: bash
+        run: |
+          set -ex
+
+          git clone --recursive https://github.com/gfx-rs/wgpu-native.git tmp
+          cd tmp
+
+          # workaround missing libgcc in ndk r23+
+          if [ ${{ matrix.goos }} == "android" ]; then
+            mkdir -p tmp-lib
+            echo "INPUT(-lunwind)" | tee tmp-lib/libgcc.a
+            export RUSTFLAGS="-L $PWD/tmp-lib"
+          fi
+
+          cargo build --release --config profile.release.strip=\"symbols\"
+          ls -al target/${{ matrix.target }}/release/
+
+          mv target/${{ matrix.target }}/release/libwgpu_native.a target/${{ matrix.target }}/release/${{ matrix.goos }}_${{ matrix.goarch }}_libwgpu_native.a
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: wgpu-artifacts
+          path: |
+            ${{ github.workspace }}/tmp/target/${{ matrix.target }}/release/${{ matrix.goos }}_${{ matrix.goarch }}_libwgpu_native.a
+
+  send-pr:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: build-wgpu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: wgpu-artifacts
+          path: ${{ github.workspace }}/tmp
+
+      - name: Copy artifacts
+        shell: bash
+        run: |
+          set -ex
+
+          declare -a arr=(
+              "android_amd64"
+              "android_386"
+              "android_arm"
+              "android_arm64"
+              "darwin_amd64"
+              "darwin_arm64"
+              "ios_amd64"
+              "ios_arm64"
+              "linux_amd64"
+              "windows_amd64")
+
+          for i in "${arr[@]}"
+          do
+              # split string
+              IFS='_' read -ra tuple <<< "$i"
+              GOOS="${tuple[0]}"
+              GOARCH="${tuple[1]}"
+
+              mkdir -p $GITHUB_WORKSPACE/wgpu/lib/$GOOS/$GOARCH
+              rm -f $GITHUB_WORKSPACE/wgpu/lib/$GOOS/$GOARCH/libwgpu_native.a
+              cp $GITHUB_WORKSPACE/tmp/"$GOOS"_"$GOARCH"_libwgpu_native.a $GITHUB_WORKSPACE/wgpu/lib/$GOOS/$GOARCH/libwgpu_native.a
+          done
+
+          rm -rf $GITHUB_WORKSPACE/tmp
+          tree $GITHUB_WORKSPACE/wgpu
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          commit-message: update `wgpu-native` library
+          branch-suffix: random
+          title: update `wgpu-native` library
+          body: auto-generated PR to update `wgpu-native` library

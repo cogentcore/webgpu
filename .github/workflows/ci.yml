@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  test-build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    env:
+      CGO_ENABLED: "1"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: Linux
+            run_examples: true
+            setup_env: |
+              sudo apt-get update
+              sudo apt-get install -f -y libegl1-mesa-dev mesa-vulkan-drivers
+          - os: macos-latest
+            name: Darwin
+            run_examples: false # macos vm doesn't have software metal api
+          - os: windows-latest
+            name: Windows
+            run_examples: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "stable"
+      - name: Setup Environment
+        run: ${{ matrix.setup_env }}
+        shell: bash
+      - name: Run tests
+        run: |
+          set -x;
+          cd wgpu;
+          go test -x;
+        shell: bash
+      - name: Run examples
+        if: ${{ matrix.run_examples }}
+        run: |
+          set -x;
+          export WGPU_FORCE_FALLBACK_ADAPTER=1;
+          export WGPU_LOG_LEVEL=TRACE;
+          go run github.com/cogentcore/webgpu/examples/compute;
+          go run github.com/cogentcore/webgpu/examples/capture;
+          go run github.com/cogentcore/webgpu/examples/adapters;
+        shell: bash
