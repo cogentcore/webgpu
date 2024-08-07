@@ -42,4 +42,6 @@ func (g Texture) CreateView(descriptor *TextureViewDescriptor) (*TextureView, er
 	}, nil
 }
 
+func (g Texture) Present() {} // no-op
+
 func (g Texture) Release() {} // no-op

@@ -2,7 +2,16 @@
 
 package wgpu
 
-type Surface struct{} // no JS equivalent
+import (
+	"syscall/js"
+)
+
+// Surface as described:
+// https://gpuweb.github.io/gpuweb/#gpucanvascontext
+// (CanvasContext is the closest equivalent to Surface in js)
+type Surface struct {
+	jsValue js.Value
+}
 
 func (g Surface) GetPreferredFormat(adapter *Adapter) TextureFormat {
 	return TextureFormatBGRA8Unorm
@@ -16,6 +25,11 @@ func (g Surface) GetCapabilities(adapter *Adapter) (ret SurfaceCapabilities) {
 	ret.AlphaModes = []CompositeAlphaMode{CompositeAlphaModeOpaque, CompositeAlphaModePreMultiplied}
 	ret.PresentModes = []PresentMode{PresentModeImmediate}
 	return
+}
+
+func (g Surface) GetCurrentTexture() (*Texture, error) {
+	texture := g.jsValue.Call("getCurrentTexture")
+	return &Texture{texture}, nil
 }
 
 func (g Surface) Release() {} // no-op
