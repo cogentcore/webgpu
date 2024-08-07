@@ -1076,49 +1076,6 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 	return &ShaderModule{ref}, nil
 }
 
-func (p *Device) CreateSwapChain(surface *Surface, descriptor *SwapChainDescriptor) (*SwapChain, error) {
-	var desc C.WGPUSwapChainDescriptor
-
-	if descriptor != nil {
-		desc = C.WGPUSwapChainDescriptor{
-			usage:       C.WGPUTextureUsageFlags(descriptor.Usage),
-			format:      C.WGPUTextureFormat(descriptor.Format),
-			width:       C.uint32_t(descriptor.Width),
-			height:      C.uint32_t(descriptor.Height),
-			presentMode: C.WGPUPresentMode(descriptor.PresentMode),
-		}
-
-		extras := (*C.WGPUSwapChainDescriptorExtras)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSwapChainDescriptorExtras{}))))
-		defer C.free(unsafe.Pointer(extras))
-
-		extras.chain.next = nil
-		extras.chain.sType = C.WGPUSType_SwapChainDescriptorExtras
-
-		extras.alphaMode = C.WGPUCompositeAlphaMode(descriptor.AlphaMode)
-
-		viewFormatCount := len(descriptor.ViewFormats)
-		if viewFormatCount > 0 {
-			viewFormats := C.malloc(C.size_t(unsafe.Sizeof(C.WGPUTextureFormat(0))) * C.size_t(viewFormatCount))
-			defer C.free(viewFormats)
-
-			viewFormatsSlice := unsafe.Slice((*TextureFormat)(viewFormats), viewFormatCount)
-			copy(viewFormatsSlice, descriptor.ViewFormats)
-
-			extras.viewFormatCount = C.size_t(viewFormatCount)
-			extras.viewFormats = (*C.WGPUTextureFormat)(viewFormats)
-		} else {
-			extras.viewFormatCount = 0
-			extras.viewFormats = nil
-		}
-
-		desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(extras))
-	}
-
-	ref := C.wgpuDeviceCreateSwapChain(p.ref, surface.ref, &desc)
-	C.wgpuDeviceReference(p.ref)
-	return &SwapChain{deviceRef: p.ref, ref: ref}, nil
-}
-
 func (p *Device) CreateTexture(descriptor *TextureDescriptor) (*Texture, error) {
 	var desc C.WGPUTextureDescriptor
 

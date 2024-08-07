@@ -207,7 +207,7 @@ func (p *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, err
 			opts.compatibleSurface = options.CompatibleSurface.ref
 		}
 		opts.powerPreference = C.WGPUPowerPreference(options.PowerPreference)
-		opts.forceFallbackAdapter = C.bool(options.ForceFallbackAdapter)
+		opts.forceFallbackAdapter = C.WGPUBool(options.ForceFallbackAdapter)
 		opts.backendType = C.WGPUBackendType(options.BackendType)
 	}
 
@@ -219,7 +219,7 @@ func (p *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, err
 		adapter = a
 	}
 	handle := cgo.NewHandle(cb)
-	C.wgpuInstanceRequestAdapter(p.ref, opts, C.WGPURequestAdapterCallback(C.gowebgpu_request_adapter_callback_c), unsafe.Pointer(&handle))
+	C.wgpuInstanceRequestAdapter(p.ref, opts, C.WGPUInstanceRequestAdapterCallback(C.gowebgpu_request_adapter_callback_c), unsafe.Pointer(&handle))
 
 	if status != RequestAdapterStatusSuccess {
 		return nil, errors.New("failed to request adapter")
@@ -250,7 +250,7 @@ func (p *Instance) EnumerateAdapters(options *InstanceEnumerateAdapterOptons) []
 	return adapters
 }
 
-type StorageReport struct {
+type RegistryReport struct {
 	NumOccupied uint64
 	NumVacant   uint64
 	NumError    uint64
@@ -258,25 +258,25 @@ type StorageReport struct {
 }
 
 type HubReport struct {
-	Adapters         StorageReport
-	Devices          StorageReport
-	PipelineLayouts  StorageReport
-	ShaderModules    StorageReport
-	BindGroupLayouts StorageReport
-	BindGroups       StorageReport
-	CommandBuffers   StorageReport
-	RenderBundles    StorageReport
-	RenderPipelines  StorageReport
-	ComputePipelines StorageReport
-	QuerySets        StorageReport
-	Buffers          StorageReport
-	Textures         StorageReport
-	TextureViews     StorageReport
-	Samplers         StorageReport
+	Adapters         RegistryReport
+	Devices          RegistryReport
+	PipelineLayouts  RegistryReport
+	ShaderModules    RegistryReport
+	BindGroupLayouts RegistryReport
+	BindGroups       RegistryReport
+	CommandBuffers   RegistryReport
+	RenderBundles    RegistryReport
+	RenderPipelines  RegistryReport
+	ComputePipelines RegistryReport
+	QuerySets        RegistryReport
+	Buffers          RegistryReport
+	Textures         RegistryReport
+	TextureViews     RegistryReport
+	Samplers         RegistryReport
 }
 
 type GlobalReport struct {
-	Surfaces StorageReport
+	Surfaces RegistryReport
 	Vulkan   *HubReport
 	Metal    *HubReport
 	Dx12     *HubReport
@@ -288,8 +288,8 @@ func (p *Instance) GenerateReport() GlobalReport {
 	var r C.WGPUGlobalReport
 	C.wgpuGenerateReport(p.ref, &r)
 
-	mapStorageReport := func(creport C.WGPUStorageReport) StorageReport {
-		return StorageReport{
+	mapRegistryReport := func(creport C.WGPURegistryReport) RegistryReport {
+		return RegistryReport{
 			NumOccupied: uint64(creport.numOccupied),
 			NumVacant:   uint64(creport.numVacant),
 			NumError:    uint64(creport.numError),
@@ -299,26 +299,26 @@ func (p *Instance) GenerateReport() GlobalReport {
 
 	mapHubReport := func(creport C.WGPUHubReport) *HubReport {
 		return &HubReport{
-			Adapters:         mapStorageReport(creport.adapters),
-			Devices:          mapStorageReport(creport.devices),
-			PipelineLayouts:  mapStorageReport(creport.pipelineLayouts),
-			ShaderModules:    mapStorageReport(creport.shaderModules),
-			BindGroupLayouts: mapStorageReport(creport.bindGroupLayouts),
-			BindGroups:       mapStorageReport(creport.bindGroups),
-			CommandBuffers:   mapStorageReport(creport.commandBuffers),
-			RenderBundles:    mapStorageReport(creport.renderBundles),
-			RenderPipelines:  mapStorageReport(creport.renderPipelines),
-			ComputePipelines: mapStorageReport(creport.computePipelines),
-			QuerySets:        mapStorageReport(creport.querySets),
-			Buffers:          mapStorageReport(creport.buffers),
-			Textures:         mapStorageReport(creport.textures),
-			TextureViews:     mapStorageReport(creport.textureViews),
-			Samplers:         mapStorageReport(creport.samplers),
+			Adapters:         mapRegistryReport(creport.adapters),
+			Devices:          mapRegistryReport(creport.devices),
+			PipelineLayouts:  mapRegistryReport(creport.pipelineLayouts),
+			ShaderModules:    mapRegistryReport(creport.shaderModules),
+			BindGroupLayouts: mapRegistryReport(creport.bindGroupLayouts),
+			BindGroups:       mapRegistryReport(creport.bindGroups),
+			CommandBuffers:   mapRegistryReport(creport.commandBuffers),
+			RenderBundles:    mapRegistryReport(creport.renderBundles),
+			RenderPipelines:  mapRegistryReport(creport.renderPipelines),
+			ComputePipelines: mapRegistryReport(creport.computePipelines),
+			QuerySets:        mapRegistryReport(creport.querySets),
+			Buffers:          mapRegistryReport(creport.buffers),
+			Textures:         mapRegistryReport(creport.textures),
+			TextureViews:     mapRegistryReport(creport.textureViews),
+			Samplers:         mapRegistryReport(creport.samplers),
 		}
 	}
 
 	report := GlobalReport{
-		Surfaces: mapStorageReport(r.surfaces),
+		Surfaces: mapRegistryReport(r.surfaces),
 	}
 
 	switch r.backendType {
