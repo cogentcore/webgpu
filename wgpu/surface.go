@@ -73,25 +73,29 @@ func (p *Surface) GetCapabilities(adapter *Adapter) (ret SurfaceCapabilities) {
 
 func (p *Surface) Configure(adapter *Adapter, device *Device, config *SurfaceConfiguration) {
 	p.deviceRef = device.ref
-	cfg := &C.WGPUSurfaceConfiguration{
-		device:      p.deviceRef,
-		format:      C.WGPUTextureFormat(config.Format),
-		usage:       C.WGPUTextureUsageFlags(config.Usage),
-		alphaMode:   C.WGPUCompositeAlphaMode(config.AlphaMode),
-		width:       C.uint32_t(config.Width),
-		height:      C.uint32_t(config.Height),
-		presentMode: C.WGPUPresentMode(config.PresentMode),
-	}
-	viewFormatCount := len(config.ViewFormats)
-	if viewFormatCount > 0 {
-		viewFormats := C.malloc(C.size_t(unsafe.Sizeof(C.WGPUTextureFormat(0))) * C.size_t(viewFormatCount))
-		defer C.free(viewFormats)
 
-		viewFormatsSlice := unsafe.Slice((*TextureFormat)(viewFormats), viewFormatCount)
-		copy(viewFormatsSlice, config.ViewFormats)
+	var cfg *C.WGPUSurfaceConfiguration
+	if config != nil {
+		cfg = &C.WGPUSurfaceConfiguration{
+			device:      p.deviceRef,
+			format:      C.WGPUTextureFormat(config.Format),
+			usage:       C.WGPUTextureUsageFlags(config.Usage),
+			alphaMode:   C.WGPUCompositeAlphaMode(config.AlphaMode),
+			width:       C.uint32_t(config.Width),
+			height:      C.uint32_t(config.Height),
+			presentMode: C.WGPUPresentMode(config.PresentMode),
+		}
+		viewFormatCount := len(config.ViewFormats)
+		if viewFormatCount > 0 {
+			viewFormats := C.malloc(C.size_t(unsafe.Sizeof(C.WGPUTextureFormat(0))) * C.size_t(viewFormatCount))
+			defer C.free(viewFormats)
 
-		cfg.viewFormatCount = C.size_t(viewFormatCount)
-		cfg.viewFormats = (*C.WGPUTextureFormat)(viewFormats)
+			viewFormatsSlice := unsafe.Slice((*TextureFormat)(viewFormats), viewFormatCount)
+			copy(viewFormatsSlice, config.ViewFormats)
+
+			cfg.viewFormatCount = C.size_t(viewFormatCount)
+			cfg.viewFormats = (*C.WGPUTextureFormat)(viewFormats)
+		}
 	}
 
 	C.wgpuSurfaceConfigure(p.ref, cfg)

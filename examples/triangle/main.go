@@ -149,6 +149,7 @@ func (s *State) Render() error {
 	if err != nil {
 		return err
 	}
+	defer view.Release()
 
 	encoder, err := s.device.CreateCommandEncoder(&wgpu.CommandEncoderDescriptor{
 		Label: "Command Encoder",
