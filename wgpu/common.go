@@ -251,7 +251,7 @@ type ImageCopyBuffer struct {
 	Buffer *Buffer
 }
 
-type AdapterProperties struct {
+type AdapterInfo struct {
 	VendorId          uint32
 	VendorName        string
 	Architecture      string

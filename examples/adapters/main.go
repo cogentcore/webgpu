@@ -18,7 +18,7 @@ func main() {
 	}
 	defer adapter.Release()
 
-	fmt.Printf("selected: %s\n", prettify(adapter.GetProperties()))
+	fmt.Printf("selected: %s\n", prettify(adapter.GetInfo()))
 }
 
 func findSuitableAdapter(instance *wgpu.Instance) (selectedAdapter *wgpu.Adapter) {
@@ -26,8 +26,8 @@ func findSuitableAdapter(instance *wgpu.Instance) (selectedAdapter *wgpu.Adapter
 	for i, adapter := range adapters {
 		// logic for selecting the adapter goes here
 		// can be done by checking properties & limits
-		props := adapter.GetProperties()
-		fmt.Printf("%d: %s\n", i, prettify(props))
+		info := adapter.GetInfo()
+		fmt.Printf("%d: %s\n", i, prettify(info))
 
 		// for demostrating purposes selecting first one we get
 		if i == 0 {

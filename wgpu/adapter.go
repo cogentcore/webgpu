@@ -82,20 +82,20 @@ func (p *Adapter) GetLimits() SupportedLimits {
 	}
 }
 
-func (p *Adapter) GetProperties() AdapterProperties {
-	var props C.WGPUAdapterProperties
+func (p *Adapter) GetInfo() AdapterInfo {
+	var info C.WGPUAdapterInfo
 
-	C.wgpuAdapterGetProperties(p.ref, &props)
+	C.wgpuAdapterGetInfo(p.ref, &info)
 
-	return AdapterProperties{
-		VendorId:          uint32(props.vendorID),
-		VendorName:        C.GoString(props.vendorName),
-		Architecture:      C.GoString(props.architecture),
-		DeviceId:          uint32(props.deviceID),
-		Name:              C.GoString(props.name),
-		DriverDescription: C.GoString(props.driverDescription),
-		AdapterType:       AdapterType(props.adapterType),
-		BackendType:       BackendType(props.backendType),
+	return AdapterInfo{
+		VendorId:          uint32(info.vendorID),
+		VendorName:        C.GoString(info.vendorName),
+		Architecture:      C.GoString(info.architecture),
+		DeviceId:          uint32(info.deviceID),
+		Name:              C.GoString(info.name),
+		DriverDescription: C.GoString(info.driverDescription),
+		AdapterType:       AdapterType(info.adapterType),
+		BackendType:       BackendType(info.backendType),
 	}
 }
 
