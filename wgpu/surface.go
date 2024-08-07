@@ -10,7 +10,7 @@ package wgpu
 extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
 
 static inline WGPUTexture gowebgpu_surface_get_current_texture(WGPUSurface surface, WGPUDevice device, void * error_userdata) {
-	WGPUSurfaceTexture ref = {};
+	WGPUSurfaceTexture ref;
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuSurfaceGetCurrentTexture(surface, &ref);
 	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
