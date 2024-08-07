@@ -73,14 +73,13 @@ type Origin3D struct {
 // SurfaceConfiguration, corresponding to GPUCanvasConfiguration:
 // https://gpuweb.github.io/gpuweb/#dictdef-gpucanvasconfiguration
 type SurfaceConfiguration struct {
-	Usage                      TextureUsage
-	Format                     TextureFormat
-	Width                      uint32
-	Height                     uint32
-	PresentMode                PresentMode
-	DesiredMaximumFrameLatency uint32
-	AlphaMode                  CompositeAlphaMode
-	ViewFormats                []TextureFormat
+	Usage       TextureUsage
+	Format      TextureFormat
+	Width       uint32
+	Height      uint32
+	PresentMode PresentMode
+	AlphaMode   CompositeAlphaMode
+	ViewFormats []TextureFormat
 }
 
 type ImageCopyTexture struct {
