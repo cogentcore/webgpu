@@ -137,7 +137,7 @@ func (p *Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
 			xlibWindow.chain.next = nil
 			xlibWindow.chain.sType = C.WGPUSType_SurfaceDescriptorFromXlibWindow
 			xlibWindow.display = descriptor.XlibWindow.Display
-			xlibWindow.window = C.uint32_t(descriptor.XlibWindow.Window)
+			xlibWindow.window = C.uint64_t(descriptor.XlibWindow.Window)
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(xlibWindow))
 		}

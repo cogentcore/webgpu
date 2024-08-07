@@ -590,15 +590,15 @@ func (p *Device) CreateRenderBundleEncoder(descriptor *RenderBundleEncoderDescri
 			desc.label = label
 		}
 
-		colorFormatsCount := len(descriptor.ColorFormats)
-		if colorFormatsCount > 0 {
-			colorFormats := C.malloc(C.size_t(colorFormatsCount) * C.size_t(unsafe.Sizeof(C.WGPUTextureFormat(0))))
+		colorFormatCount := len(descriptor.ColorFormats)
+		if colorFormatCount > 0 {
+			colorFormats := C.malloc(C.size_t(colorFormatCount) * C.size_t(unsafe.Sizeof(C.WGPUTextureFormat(0))))
 			defer C.free(colorFormats)
 
-			colorFormatsSlice := unsafe.Slice((*TextureFormat)(colorFormats), colorFormatsCount)
+			colorFormatsSlice := unsafe.Slice((*TextureFormat)(colorFormats), colorFormatCount)
 			copy(colorFormatsSlice, descriptor.ColorFormats)
 
-			desc.colorFormatsCount = C.size_t(colorFormatsCount)
+			desc.colorFormatCount = C.size_t(colorFormatCount)
 			desc.colorFormats = (*C.WGPUTextureFormat)(colorFormats)
 		}
 
