@@ -233,7 +233,7 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 		device = d
 	}
 	handle := cgo.NewHandle(cb)
-	C.wgpuAdapterRequestDevice(p.ref, desc, C.WGPURequestDeviceCallback(C.gowebgpu_request_device_callback_c), unsafe.Pointer(&handle))
+	C.wgpuAdapterRequestDevice(p.ref, desc, C.WGPUAdapterRequestDeviceCallback(C.gowebgpu_request_device_callback_c), unsafe.Pointer(&handle))
 
 	if status != RequestDeviceStatusSuccess {
 		return nil, errors.New("failed to request device")
