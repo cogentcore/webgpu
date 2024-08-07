@@ -538,17 +538,18 @@ func (p *Device) CreateQuerySet(descriptor *QuerySetDescriptor) (*QuerySet, erro
 		desc._type = C.WGPUQueryType(descriptor.Type)
 		desc.count = C.uint32_t(descriptor.Count)
 
-		pipelineStatisticCount := len(descriptor.PipelineStatistics)
-		if pipelineStatisticCount > 0 {
-			pipelineStatistics := C.malloc(C.size_t(pipelineStatisticCount) * C.size_t(unsafe.Sizeof(C.WGPUPipelineStatisticName(0))))
-			defer C.free(pipelineStatistics)
+		// TODO: no longer present in C API
+		// pipelineStatisticCount := len(descriptor.PipelineStatistics)
+		// if pipelineStatisticCount > 0 {
+		// 	pipelineStatistics := C.malloc(C.size_t(pipelineStatisticCount) * C.size_t(unsafe.Sizeof(C.WGPUPipelineStatisticName(0))))
+		// 	defer C.free(pipelineStatistics)
 
-			pipelineStatisticsSlice := unsafe.Slice((*PipelineStatisticName)(pipelineStatistics), pipelineStatisticCount)
-			copy(pipelineStatisticsSlice, descriptor.PipelineStatistics)
+		// 	pipelineStatisticsSlice := unsafe.Slice((*PipelineStatisticName)(pipelineStatistics), pipelineStatisticCount)
+		// 	copy(pipelineStatisticsSlice, descriptor.PipelineStatistics)
 
-			desc.pipelineStatisticCount = C.size_t(pipelineStatisticCount)
-			desc.pipelineStatistics = (*C.WGPUPipelineStatisticName)(pipelineStatistics)
-		}
+		// 	desc.pipelineStatisticCount = C.size_t(pipelineStatisticCount)
+		// 	desc.pipelineStatistics = (*C.WGPUPipelineStatisticName)(pipelineStatistics)
+		// }
 	}
 
 	var err error = nil

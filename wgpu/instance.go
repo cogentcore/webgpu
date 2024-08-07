@@ -330,8 +330,9 @@ func (p *Instance) GenerateReport() GlobalReport {
 		report.Metal = mapHubReport(r.metal)
 	case C.WGPUBackendType_D3D12:
 		report.Dx12 = mapHubReport(r.dx12)
+	// TODO: no longer present in C API
 	// case C.WGPUBackendType_D3D11:
-	// 	report.Dx11 = mapHubReport(r.dx11) // no longer exists
+	// 	report.Dx11 = mapHubReport(r.dx11)
 	case C.WGPUBackendType_OpenGL:
 		report.Gl = mapHubReport(r.gl)
 	}
