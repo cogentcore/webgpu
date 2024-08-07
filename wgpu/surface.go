@@ -30,11 +30,6 @@ type Surface struct {
 	ref       C.WGPUSurface
 }
 
-func (p *Surface) GetPreferredFormat(adapter *Adapter) TextureFormat {
-	format := C.wgpuSurfaceGetPreferredFormat(p.ref, adapter.ref)
-	return TextureFormat(format)
-}
-
 func (p *Surface) GetCapabilities(adapter *Adapter) (ret SurfaceCapabilities) {
 	var caps C.WGPUSurfaceCapabilities
 	C.wgpuSurfaceGetCapabilities(p.ref, adapter.ref, &caps)
@@ -76,7 +71,12 @@ func (p *Surface) GetCapabilities(adapter *Adapter) (ret SurfaceCapabilities) {
 	return
 }
 
-func (p *Surface) GetCurrentTexture() (*Texture, error) {
+func (p *Surface) Configure(adapter *Adapter, device *Device, config *SurfaceConfiguration) {
+	p.deviceRef = device.ref
+	C.wgpuSurfaceConfigure(p.ref, device.ref, config) // TODO(kai): convert to C struct
+}
+
+func (p *Surface) GetCurrentTexture() (*Texture, error) { // TODO(kai): return SurfaceTexture
 	var err error = nil
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Surface).GetCurrentTexture(): " + message)
