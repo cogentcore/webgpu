@@ -7,14 +7,27 @@ package wgpu
 #include <stdlib.h>
 #include "./lib/wgpu.h"
 
+extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
+
+static inline WGPUTextureView gowebgpu_surface_get_current_texture(WGPUSurface surface, WGPUDevice device, void * error_userdata) {
+	WGPUTextureView ref = NULL;
+	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
+	ref = wgpuSurfaceGetCurrentTextureView(surface);
+	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+	return ref;
+}
+
 */
 import "C"
 import (
+	"errors"
+	"runtime/cgo"
 	"unsafe"
 )
 
 type Surface struct {
-	ref C.WGPUSurface
+	deviceRef C.WGPUDevice
+	ref       C.WGPUSurface
 }
 
 func (p *Surface) GetPreferredFormat(adapter *Adapter) TextureFormat {
@@ -61,6 +74,29 @@ func (p *Surface) GetCapabilities(adapter *Adapter) (ret SurfaceCapabilities) {
 	}
 
 	return
+}
+
+func (p *Surface) GetCurrentTexture() (*Texture, error) {
+	var err error = nil
+	var cb errorCallback = func(_ ErrorType, message string) {
+		err = errors.New("wgpu.(*Surface).GetCurrentTexture(): " + message)
+	}
+	errorCallbackHandle := cgo.NewHandle(cb)
+	defer errorCallbackHandle.Delete()
+
+	ref := C.gowebgpu_surface_get_current_texture(
+		p.ref,
+		p.deviceRef,
+		unsafe.Pointer(&errorCallbackHandle),
+	)
+	if err != nil {
+		if ref != nil {
+			C.wgpuTextureRelease(ref)
+		}
+		return nil, err
+	}
+
+	return &Texture{p.deviceRef, ref}, nil
 }
 
 func (p *Surface) Release() {
