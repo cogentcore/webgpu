@@ -77,7 +77,7 @@ func (p *Adapter) GetLimits() SupportedLimits {
 			MaxComputeWorkgroupSizeZ:                  uint32(limits.maxComputeWorkgroupSizeZ),
 			MaxComputeWorkgroupsPerDimension:          uint32(limits.maxComputeWorkgroupsPerDimension),
 
-			MaxPushConstantSize: uint32(extras.maxPushConstantSize),
+			MaxPushConstantSize: uint32(extras.limits.maxPushConstantSize),
 		},
 	}
 }
