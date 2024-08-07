@@ -141,16 +141,16 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 			desc.label = label
 		}
 
-		requiredFeaturesCount := len(descriptor.RequiredFeatures)
-		if requiredFeaturesCount != 0 {
-			requiredFeatures := C.malloc(C.size_t(requiredFeaturesCount) * C.size_t(unsafe.Sizeof(C.WGPUFeatureName(0))))
+		requiredFeatureCount := len(descriptor.RequiredFeatures)
+		if requiredFeatureCount != 0 {
+			requiredFeatures := C.malloc(C.size_t(requiredFeatureCount) * C.size_t(unsafe.Sizeof(C.WGPUFeatureName(0))))
 			defer C.free(requiredFeatures)
 
-			requiredFeaturesSlice := unsafe.Slice((*FeatureName)(requiredFeatures), requiredFeaturesCount)
+			requiredFeaturesSlice := unsafe.Slice((*FeatureName)(requiredFeatures), requiredFeatureCount)
 			copy(requiredFeaturesSlice, descriptor.RequiredFeatures)
 
 			desc.requiredFeatures = (*C.WGPUFeatureName)(requiredFeatures)
-			desc.requiredFeaturesCount = C.size_t(requiredFeaturesCount)
+			desc.requiredFeatureCount = C.size_t(requiredFeatureCount)
 		}
 
 		if descriptor.RequiredLimits != nil {
@@ -197,7 +197,7 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 
 			requiredLimitsExtras.chain.next = nil
 			requiredLimitsExtras.chain.sType = C.WGPUSType_RequiredLimitsExtras
-			requiredLimitsExtras.maxPushConstantSize = C.uint32_t(l.MaxPushConstantSize)
+			requiredLimitsExtras.limits.maxPushConstantSize = C.uint32_t(l.MaxPushConstantSize)
 
 			desc.requiredLimits.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(requiredLimitsExtras))
 		}
