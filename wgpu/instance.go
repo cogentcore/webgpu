@@ -207,7 +207,7 @@ func (p *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, err
 			opts.compatibleSurface = options.CompatibleSurface.ref
 		}
 		opts.powerPreference = C.WGPUPowerPreference(options.PowerPreference)
-		opts.forceFallbackAdapter = C.WGPUBool(options.ForceFallbackAdapter)
+		opts.forceFallbackAdapter = cBool(options.ForceFallbackAdapter)
 		opts.backendType = C.WGPUBackendType(options.BackendType)
 	}
 

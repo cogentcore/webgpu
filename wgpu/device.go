@@ -246,7 +246,7 @@ func (p *Device) CreateBindGroupLayout(descriptor *BindGroupLayoutDescriptor) (*
 					buffer: C.WGPUBufferBindingLayout{
 						nextInChain:      nil,
 						_type:            C.WGPUBufferBindingType(v.Buffer.Type),
-						hasDynamicOffset: C.WGPUBool(v.Buffer.HasDynamicOffset),
+						hasDynamicOffset: cBool(v.Buffer.HasDynamicOffset),
 						minBindingSize:   C.uint64_t(v.Buffer.MinBindingSize),
 					},
 					sampler: C.WGPUSamplerBindingLayout{
@@ -257,7 +257,7 @@ func (p *Device) CreateBindGroupLayout(descriptor *BindGroupLayoutDescriptor) (*
 						nextInChain:   nil,
 						sampleType:    C.WGPUTextureSampleType(v.Texture.SampleType),
 						viewDimension: C.WGPUTextureViewDimension(v.Texture.ViewDimension),
-						multisampled:  C.WGPUBool(v.Texture.Multisampled),
+						multisampled:  cBool(v.Texture.Multisampled),
 					},
 					storageTexture: C.WGPUStorageTextureBindingLayout{
 						nextInChain:   nil,
@@ -306,7 +306,7 @@ func (p *Device) CreateBuffer(descriptor *BufferDescriptor) (*Buffer, error) {
 
 		desc.usage = C.WGPUBufferUsageFlags(descriptor.Usage)
 		desc.size = C.uint64_t(descriptor.Size)
-		desc.mappedAtCreation = C.WGPUBool(descriptor.MappedAtCreation)
+		desc.mappedAtCreation = cBool(descriptor.MappedAtCreation)
 	}
 
 	var err error = nil
@@ -604,8 +604,8 @@ func (p *Device) CreateRenderBundleEncoder(descriptor *RenderBundleEncoderDescri
 
 		desc.depthStencilFormat = C.WGPUTextureFormat(descriptor.DepthStencilFormat)
 		desc.sampleCount = C.uint32_t(descriptor.SampleCount)
-		desc.depthReadOnly = C.WGPUBool(descriptor.DepthReadOnly)
-		desc.stencilReadOnly = C.WGPUBool(descriptor.StencilReadOnly)
+		desc.depthReadOnly = cBool(descriptor.DepthReadOnly)
+		desc.stencilReadOnly = cBool(descriptor.StencilReadOnly)
 	}
 
 	ref := C.wgpuDeviceCreateRenderBundleEncoder(p.ref, &desc)
@@ -782,7 +782,7 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 
 			ds.nextInChain = nil
 			ds.format = C.WGPUTextureFormat(depthStencil.Format)
-			ds.depthWriteEnabled = C.WGPUBool(depthStencil.DepthWriteEnabled)
+			ds.depthWriteEnabled = cBool(depthStencil.DepthWriteEnabled)
 			ds.depthCompare = C.WGPUCompareFunction(depthStencil.DepthCompare)
 			ds.stencilFront = C.WGPUStencilFaceState{
 				compare:     C.WGPUCompareFunction(depthStencil.StencilFront.Compare),
@@ -808,7 +808,7 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 		desc.multisample = C.WGPUMultisampleState{
 			count:                  C.uint32_t(descriptor.Multisample.Count),
 			mask:                   C.uint32_t(descriptor.Multisample.Mask),
-			alphaToCoverageEnabled: C.WGPUBool(descriptor.Multisample.AlphaToCoverageEnabled),
+			alphaToCoverageEnabled: cBool(descriptor.Multisample.AlphaToCoverageEnabled),
 		}
 
 		if descriptor.Fragment != nil {
@@ -1201,5 +1201,5 @@ func (p *Device) Poll(wait bool, wrappedSubmissionIndex *WrappedSubmissionIndex)
 		}
 	}
 
-	return bool(C.wgpuDevicePoll(p.ref, C.WGPUBool(wait), index))
+	return bool(C.wgpuDevicePoll(p.ref, cBool(wait), index))
 }

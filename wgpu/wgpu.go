@@ -109,3 +109,11 @@ func (p *RenderBundle) Release()    { C.wgpuRenderBundleRelease(p.ref) }
 func (p *Sampler) Release()         { C.wgpuSamplerRelease(p.ref) }
 func (p *ShaderModule) Release()    { C.wgpuShaderModuleRelease(p.ref) }
 func (p *TextureView) Release()     { C.wgpuTextureViewRelease(p.ref) }
+
+// cBool converts the given Go bool to a C.WGPUBool.
+func cBool(b bool) C.WGPUBool {
+	if b {
+		return 1
+	}
+	return 0
+}
