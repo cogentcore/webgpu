@@ -489,7 +489,7 @@ func (p *Device) CreatePipelineLayout(descriptor *PipelineLayoutDescriptor) (*Pi
 				}
 			}
 
-			pipelineLayoutExtras.pushConstantRangeCount = C.uint32_t(pushConstantRangeCount)
+			pipelineLayoutExtras.pushConstantRangeCount = C.size_t(pushConstantRangeCount)
 			pipelineLayoutExtras.pushConstantRanges = (*C.WGPUPushConstantRange)(pushConstantRanges)
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(pipelineLayoutExtras))
@@ -538,15 +538,15 @@ func (p *Device) CreateQuerySet(descriptor *QuerySetDescriptor) (*QuerySet, erro
 		desc._type = C.WGPUQueryType(descriptor.Type)
 		desc.count = C.uint32_t(descriptor.Count)
 
-		pipelineStatisticsCount := len(descriptor.PipelineStatistics)
-		if pipelineStatisticsCount > 0 {
-			pipelineStatistics := C.malloc(C.size_t(pipelineStatisticsCount) * C.size_t(unsafe.Sizeof(C.WGPUPipelineStatisticName(0))))
+		pipelineStatisticCount := len(descriptor.PipelineStatistics)
+		if pipelineStatisticCount > 0 {
+			pipelineStatistics := C.malloc(C.size_t(pipelineStatisticCount) * C.size_t(unsafe.Sizeof(C.WGPUPipelineStatisticName(0))))
 			defer C.free(pipelineStatistics)
 
-			pipelineStatisticsSlice := unsafe.Slice((*PipelineStatisticName)(pipelineStatistics), pipelineStatisticsCount)
+			pipelineStatisticsSlice := unsafe.Slice((*PipelineStatisticName)(pipelineStatistics), pipelineStatisticCount)
 			copy(pipelineStatisticsSlice, descriptor.PipelineStatistics)
 
-			desc.pipelineStatisticsCount = C.size_t(pipelineStatisticsCount)
+			desc.pipelineStatisticCount = C.size_t(pipelineStatisticCount)
 			desc.pipelineStatistics = (*C.WGPUPipelineStatisticName)(pipelineStatistics)
 		}
 	}
