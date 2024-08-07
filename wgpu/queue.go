@@ -54,7 +54,7 @@ func gowebgpu_queue_work_done_callback_go(status C.WGPUQueueWorkDoneStatus, user
 func (p *Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
 	handle := cgo.NewHandle(callback)
 
-	C.wgpuQueueOnSubmittedWorkDone(p.ref, C.WGPUQueueWorkDoneCallback(C.gowebgpu_queue_work_done_callback_c), unsafe.Pointer(&handle))
+	C.wgpuQueueOnSubmittedWorkDone(p.ref, C.WGPUQueueOnSubmittedWorkDoneCallback(C.gowebgpu_queue_work_done_callback_c), unsafe.Pointer(&handle))
 }
 
 func (p *Queue) Submit(commands ...*CommandBuffer) (submissionIndex SubmissionIndex) {
