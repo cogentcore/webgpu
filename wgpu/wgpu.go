@@ -117,3 +117,8 @@ func cBool(b bool) C.WGPUBool {
 	}
 	return 0
 }
+
+// goBool converts the given C.WGPUBool to a Go bool.
+func goBool(b C.WGPUBool) bool {
+	return b != 0
+}

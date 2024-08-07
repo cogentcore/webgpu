@@ -89,11 +89,11 @@ func (p *Adapter) GetInfo() AdapterInfo {
 
 	return AdapterInfo{
 		VendorId:          uint32(info.vendorID),
-		VendorName:        C.GoString(info.vendorName),
+		VendorName:        C.GoString(info.vendor),
 		Architecture:      C.GoString(info.architecture),
 		DeviceId:          uint32(info.deviceID),
-		Name:              C.GoString(info.name),
-		DriverDescription: C.GoString(info.driverDescription),
+		Name:              C.GoString(info.device),
+		DriverDescription: C.GoString(info.description),
 		AdapterType:       AdapterType(info.adapterType),
 		BackendType:       BackendType(info.backendType),
 	}
@@ -101,7 +101,7 @@ func (p *Adapter) GetInfo() AdapterInfo {
 
 func (p *Adapter) HasFeature(feature FeatureName) bool {
 	hasFeature := C.wgpuAdapterHasFeature(p.ref, C.WGPUFeatureName(feature))
-	return bool(hasFeature)
+	return goBool(hasFeature)
 }
 
 type requestDeviceCb func(status RequestDeviceStatus, device *Device, message string)

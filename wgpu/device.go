@@ -1189,7 +1189,7 @@ func (p *Device) GetQueue() *Queue {
 
 func (p *Device) HasFeature(feature FeatureName) bool {
 	hasFeature := C.wgpuDeviceHasFeature(p.ref, C.WGPUFeatureName(feature))
-	return bool(hasFeature)
+	return goBool(hasFeature)
 }
 
 func (p *Device) Poll(wait bool, wrappedSubmissionIndex *WrappedSubmissionIndex) (queueEmpty bool) {
@@ -1201,5 +1201,5 @@ func (p *Device) Poll(wait bool, wrappedSubmissionIndex *WrappedSubmissionIndex)
 		}
 	}
 
-	return bool(C.wgpuDevicePoll(p.ref, cBool(wait), index))
+	return goBool(C.wgpuDevicePoll(p.ref, cBool(wait), index))
 }
