@@ -114,10 +114,6 @@ func (p *Texture) GetWidth() uint32 {
 	return uint32(C.wgpuTextureGetWidth(p.ref))
 }
 
-func (p *Texture) Present() {
-	C.wgpuSurfaceTexturePresent(p.ref)
-}
-
 func (p *Texture) Release() {
 	C.gowebgpu_texture_release(p.ref, p.deviceRef)
 }

@@ -26,4 +26,6 @@ func (g Surface) GetCurrentTexture() (*Texture, error) {
 	return &Texture{texture}, nil
 }
 
+func (g Surface) Present() {} // no-op
+
 func (g Surface) Release() {} // no-op

@@ -10,11 +10,11 @@ package wgpu
 extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
 
 static inline WGPUTexture gowebgpu_surface_get_current_texture(WGPUSurface surface, WGPUDevice device, void * error_userdata) {
-	WGPUTexture ref = NULL;
+	WGPUSurfaceTexture ref = {};
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	wgpuSurfaceGetCurrentTexture(surface, ref);
+	wgpuSurfaceGetCurrentTexture(surface, &ref);
 	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
+	return ref.texture;
 }
 
 */
@@ -76,7 +76,7 @@ func (p *Surface) Configure(adapter *Adapter, device *Device, config *SurfaceCon
 	C.wgpuSurfaceConfigure(p.ref, device.ref, config) // TODO(kai): convert to C struct
 }
 
-func (p *Surface) GetCurrentTexture() (*Texture, error) { // TODO(kai): return SurfaceTexture
+func (p *Surface) GetCurrentTexture() (*Texture, error) {
 	var err error = nil
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Surface).GetCurrentTexture(): " + message)
@@ -97,6 +97,10 @@ func (p *Surface) GetCurrentTexture() (*Texture, error) { // TODO(kai): return S
 	}
 
 	return &Texture{p.deviceRef, ref}, nil
+}
+
+func (p *Surface) Present() {
+	C.wgpuSurfacePresent(p.ref)
 }
 
 func (p *Surface) Release() {
