@@ -34,13 +34,13 @@ func init() {
 var shader string
 
 type State struct {
-	instance  *wgpu.Instance
-	surface   *wgpu.Surface
-	swapChain *wgpu.SwapChain
-	device    *wgpu.Device
-	queue     *wgpu.Queue
-	config    *wgpu.SwapChainDescriptor
-	pipeline  *wgpu.RenderPipeline
+	instance *wgpu.Instance
+	adapter  *wgpu.Adapter
+	surface  *wgpu.Surface
+	device   *wgpu.Device
+	queue    *wgpu.Queue
+	config   *wgpu.SurfaceConfiguration
+	pipeline *wgpu.RenderPipeline
 }
 
 func InitState[T interface{ GetSize() (int, int) }](window T, sd *wgpu.SurfaceDescriptor) (s *State, err error) {
@@ -56,16 +56,16 @@ func InitState[T interface{ GetSize() (int, int) }](window T, sd *wgpu.SurfaceDe
 
 	s.surface = s.instance.CreateSurface(sd)
 
-	adapter, err := s.instance.RequestAdapter(&wgpu.RequestAdapterOptions{
+	s.adapter, err = s.instance.RequestAdapter(&wgpu.RequestAdapterOptions{
 		ForceFallbackAdapter: forceFallbackAdapter,
 		CompatibleSurface:    s.surface,
 	})
 	if err != nil {
 		return s, err
 	}
-	defer adapter.Release()
+	defer s.adapter.Release()
 
-	s.device, err = adapter.RequestDevice(nil)
+	s.device, err = s.adapter.RequestDevice(nil)
 	if err != nil {
 		return s, err
 	}
@@ -80,10 +80,10 @@ func InitState[T interface{ GetSize() (int, int) }](window T, sd *wgpu.SurfaceDe
 	}
 	defer shader.Release()
 
-	caps := s.surface.GetCapabilities(adapter)
+	caps := s.surface.GetCapabilities(s.adapter)
 
 	width, height := window.GetSize()
-	s.config = &wgpu.SwapChainDescriptor{
+	s.config = &wgpu.SurfaceConfiguration{
 		Usage:       wgpu.TextureUsageRenderAttachment,
 		Format:      caps.Formats[0],
 		Width:       uint32(width),
@@ -92,10 +92,7 @@ func InitState[T interface{ GetSize() (int, int) }](window T, sd *wgpu.SurfaceDe
 		AlphaMode:   caps.AlphaModes[0],
 	}
 
-	s.swapChain, err = s.device.CreateSwapChain(s.surface, s.config)
-	if err != nil {
-		return s, err
-	}
+	s.surface.Configure(s.adapter, s.device, s.config)
 
 	s.pipeline, err = s.device.CreateRenderPipeline(&wgpu.RenderPipelineDescriptor{
 		Label: "Render Pipeline",
@@ -138,23 +135,20 @@ func (s *State) Resize(width, height int) {
 		s.config.Width = uint32(width)
 		s.config.Height = uint32(height)
 
-		if s.swapChain != nil {
-			s.swapChain.Release()
-		}
-		var err error
-		s.swapChain, err = s.device.CreateSwapChain(s.surface, s.config)
-		if err != nil {
-			panic(err)
-		}
+		s.surface.Configure(s.adapter, s.device, s.config)
 	}
 }
 
 func (s *State) Render() error {
-	nextTexture, err := s.swapChain.GetCurrentTextureView()
+	nextTexture, err := s.surface.GetCurrentTexture()
 	if err != nil {
 		return err
 	}
 	defer nextTexture.Release()
+	view, err := nextTexture.CreateView(nil)
+	if err != nil {
+		return err
+	}
 
 	encoder, err := s.device.CreateCommandEncoder(&wgpu.CommandEncoderDescriptor{
 		Label: "Command Encoder",
@@ -167,7 +161,7 @@ func (s *State) Render() error {
 	renderPass := encoder.BeginRenderPass(&wgpu.RenderPassDescriptor{
 		ColorAttachments: []wgpu.RenderPassColorAttachment{
 			{
-				View:       nextTexture,
+				View:       view,
 				LoadOp:     wgpu.LoadOpClear,
 				StoreOp:    wgpu.StoreOpStore,
 				ClearValue: wgpu.ColorGreen,
@@ -187,7 +181,7 @@ func (s *State) Render() error {
 	defer cmdBuffer.Release()
 
 	s.queue.Submit(cmdBuffer)
-	s.swapChain.Present()
+	s.surface.Present()
 
 	return nil
 }
@@ -196,10 +190,6 @@ func (s *State) Destroy() {
 	if s.pipeline != nil {
 		s.pipeline.Release()
 		s.pipeline = nil
-	}
-	if s.swapChain != nil {
-		s.swapChain.Release()
-		s.swapChain = nil
 	}
 	if s.config != nil {
 		s.config = nil
