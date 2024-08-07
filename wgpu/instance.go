@@ -181,7 +181,7 @@ func (p *Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
 	if ref == nil {
 		panic("Failed to acquire Surface")
 	}
-	return &Surface{p.deviceRef, ref}
+	return &Surface{ref: ref}
 }
 
 type requestAdapterCb func(status RequestAdapterStatus, adapter *Adapter, message string)
@@ -251,10 +251,11 @@ func (p *Instance) EnumerateAdapters(options *InstanceEnumerateAdapterOptons) []
 }
 
 type RegistryReport struct {
-	NumOccupied uint64
-	NumVacant   uint64
-	NumError    uint64
-	ElementSize uint64
+	NumAllocated        uint64
+	NumKeptFromUser     uint64
+	NumReleasedFromUser uint64
+	NumError            uint64
+	ElementSize         uint64
 }
 
 type HubReport struct {
@@ -290,10 +291,11 @@ func (p *Instance) GenerateReport() GlobalReport {
 
 	mapRegistryReport := func(creport C.WGPURegistryReport) RegistryReport {
 		return RegistryReport{
-			NumOccupied: uint64(creport.numOccupied),
-			NumVacant:   uint64(creport.numVacant),
-			NumError:    uint64(creport.numError),
-			ElementSize: uint64(creport.elementSize),
+			NumAllocated:        uint64(creport.numAllocated),
+			NumKeptFromUser:     uint64(creport.numKeptFromUser),
+			NumReleasedFromUser: uint64(creport.numReleasedFromUser),
+			NumError:            uint64(creport.numError),
+			ElementSize:         uint64(creport.elementSize),
 		}
 	}
 
@@ -328,8 +330,8 @@ func (p *Instance) GenerateReport() GlobalReport {
 		report.Metal = mapHubReport(r.metal)
 	case C.WGPUBackendType_D3D12:
 		report.Dx12 = mapHubReport(r.dx12)
-	case C.WGPUBackendType_D3D11:
-		report.Dx11 = mapHubReport(r.dx11)
+	// case C.WGPUBackendType_D3D11:
+	// 	report.Dx11 = mapHubReport(r.dx11) // no longer exists
 	case C.WGPUBackendType_OpenGL:
 		report.Gl = mapHubReport(r.gl)
 	}

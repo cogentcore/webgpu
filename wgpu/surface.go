@@ -73,7 +73,7 @@ func (p *Surface) GetCapabilities(adapter *Adapter) (ret SurfaceCapabilities) {
 
 func (p *Surface) Configure(adapter *Adapter, device *Device, config *SurfaceConfiguration) {
 	p.deviceRef = device.ref
-	C.wgpuSurfaceConfigure(p.ref, device.ref, config) // TODO(kai): convert to C struct
+	C.wgpuSurfaceConfigure(p.ref, config) // TODO(kai): convert to C struct
 }
 
 func (p *Surface) GetCurrentTexture() (*Texture, error) {
