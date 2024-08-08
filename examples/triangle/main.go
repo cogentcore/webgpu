@@ -144,7 +144,6 @@ func (s *State) Render() error {
 	if err != nil {
 		return err
 	}
-	defer nextTexture.Release()
 	view, err := nextTexture.CreateView(nil)
 	if err != nil {
 		return err

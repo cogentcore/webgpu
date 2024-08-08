@@ -101,6 +101,8 @@ func (p *Surface) Configure(adapter *Adapter, device *Device, config *SurfaceCon
 	C.wgpuSurfaceConfigure(p.ref, cfg)
 }
 
+// NOTE: you should typically not call [Texture.Release] on the returned texture.
+// Instead, you should call [TextureView.Release] on any [TextureView] you create from it.
 func (p *Surface) GetCurrentTexture() (*Texture, error) {
 	var err error = nil
 	var cb errorCallback = func(_ ErrorType, message string) {
