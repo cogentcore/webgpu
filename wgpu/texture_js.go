@@ -33,6 +33,18 @@ func (g Texture) GetFormat() TextureFormat {
 	return TextureFormat(jsFormat.Int()) // TODO(kai): need to set from string
 }
 
+// GetDepthOrArrayLayers as described:
+// https://gpuweb.github.io/gpuweb/#dom-gputexture-depthorarraylayers
+func (g Texture) GetDepthOrArrayLayers() uint32 {
+	return uint32(g.jsValue.Get("depthOrArrayLayers").Int())
+}
+
+// GetMipLevelCount as described:
+// https://gpuweb.github.io/gpuweb/#dom-gputexture-miplevelcount
+func (g Texture) GetMipLevelCount() uint32 {
+	return uint32(g.jsValue.Get("mipLevelCount").Int())
+}
+
 // CreateView as described:
 // https://gpuweb.github.io/gpuweb/#dom-gputexture-createview
 func (g Texture) CreateView(descriptor *TextureViewDescriptor) (*TextureView, error) {
