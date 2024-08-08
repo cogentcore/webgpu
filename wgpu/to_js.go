@@ -75,7 +75,7 @@ func (g *DeviceDescriptor) toJS() any {
 	return result
 }
 
-func (g *SwapChainDescriptor) toJS() any {
+func (g *SurfaceConfiguration) toJS() any {
 	result := make(map[string]any)
 	result["usage"] = uint32(g.Usage)
 	result["format"] = enumToJS(g.Format)

@@ -21,6 +21,12 @@ func (g Surface) GetCapabilities(adapter *Adapter) (ret SurfaceCapabilities) {
 	return
 }
 
+func (g Surface) Configure(adapter *Adapter, device *Device, config *SurfaceConfiguration) {
+	jsConfig := pointerToJS(config).(map[string]any)
+	jsConfig["device"] = pointerToJS(device)
+	g.jsValue.Call("configure", jsConfig)
+}
+
 func (g Surface) GetCurrentTexture() (*Texture, error) {
 	texture := g.jsValue.Call("getCurrentTexture")
 	return &Texture{texture}, nil

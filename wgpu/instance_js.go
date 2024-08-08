@@ -46,7 +46,8 @@ type SurfaceDescriptor struct {
 }
 
 func (g Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
-	return &Surface{}
+	jsContext := js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "webgpu")
+	return &Surface{jsContext}
 }
 
 func (g Instance) GenerateReport() any { return nil } // no-op
