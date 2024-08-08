@@ -239,9 +239,9 @@ type RenderPipeline struct {
 
 // GetBindGroupLayout as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpupipelinebase-getbindgrouplayout
-func (g RenderPipeline) GetBindGroupLayout(index uint32) BindGroupLayout {
+func (g RenderPipeline) GetBindGroupLayout(index uint32) *BindGroupLayout {
 	jsLayout := g.jsValue.Call("getBindGroupLayout", index)
-	return BindGroupLayout{
+	return &BindGroupLayout{
 		jsValue: jsLayout,
 	}
 }

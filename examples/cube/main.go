@@ -143,10 +143,10 @@ var shader string
 
 type State struct {
 	surface    *wgpu.Surface
-	swapChain  *wgpu.SwapChain
+	adapter    *wgpu.Adapter
 	device     *wgpu.Device
 	queue      *wgpu.Queue
-	config     *wgpu.SwapChainDescriptor
+	config     *wgpu.SurfaceConfiguration
 	vertexBuf  *wgpu.Buffer
 	indexBuf   *wgpu.Buffer
 	uniformBuf *wgpu.Buffer
@@ -186,7 +186,7 @@ func InitState(window *glfw.Window) (s *State, err error) {
 	caps := s.surface.GetCapabilities(adapter)
 
 	width, height := window.GetSize()
-	s.config = &wgpu.SwapChainDescriptor{
+	s.config = &wgpu.SurfaceConfiguration{
 		Usage:       wgpu.TextureUsageRenderAttachment,
 		Format:      caps.Formats[0],
 		Width:       uint32(width),
@@ -195,10 +195,7 @@ func InitState(window *glfw.Window) (s *State, err error) {
 		AlphaMode:   caps.AlphaModes[0],
 	}
 
-	s.swapChain, err = s.device.CreateSwapChain(s.surface, s.config)
-	if err != nil {
-		return s, err
-	}
+	s.surface.Configure(s.adapter, s.device, s.config)
 
 	s.vertexBuf, err = s.device.CreateBufferInit(&wgpu.BufferInitDescriptor{
 		Label:    "Vertex Buffer",
@@ -339,23 +336,20 @@ func (s *State) Resize(width, height int) {
 		mxTotal := generateMatrix(float32(width) / float32(height))
 		s.queue.WriteBuffer(s.uniformBuf, 0, wgpu.ToBytes(mxTotal[:]))
 
-		if s.swapChain != nil {
-			s.swapChain.Release()
-		}
-		var err error
-		s.swapChain, err = s.device.CreateSwapChain(s.surface, s.config)
-		if err != nil {
-			panic(err)
-		}
+		s.surface.Configure(s.adapter, s.device, s.config)
 	}
 }
 
 func (s *State) Render() error {
-	nextTexture, err := s.swapChain.GetCurrentTextureView()
+	nextTexture, err := s.surface.GetCurrentTexture()
 	if err != nil {
 		return err
 	}
-	defer nextTexture.Release()
+	view, err := nextTexture.CreateView(nil)
+	if err != nil {
+		return err
+	}
+	defer view.Release()
 
 	encoder, err := s.device.CreateCommandEncoder(nil)
 	if err != nil {
@@ -366,7 +360,7 @@ func (s *State) Render() error {
 	renderPass := encoder.BeginRenderPass(&wgpu.RenderPassDescriptor{
 		ColorAttachments: []wgpu.RenderPassColorAttachment{
 			{
-				View:       nextTexture,
+				View:       view,
 				LoadOp:     wgpu.LoadOpClear,
 				StoreOp:    wgpu.StoreOpStore,
 				ClearValue: wgpu.Color{R: 0.1, G: 0.2, B: 0.3, A: 1.0},
@@ -389,7 +383,7 @@ func (s *State) Render() error {
 	defer cmdBuffer.Release()
 
 	s.queue.Submit(cmdBuffer)
-	s.swapChain.Present()
+	s.surface.Present()
 
 	return nil
 }
@@ -414,10 +408,6 @@ func (s *State) Destroy() {
 	if s.vertexBuf != nil {
 		s.vertexBuf.Release()
 		s.vertexBuf = nil
-	}
-	if s.swapChain != nil {
-		s.swapChain.Release()
-		s.swapChain = nil
 	}
 	if s.config != nil {
 		s.config = nil
