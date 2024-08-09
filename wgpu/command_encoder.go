@@ -143,8 +143,9 @@ func (p *CommandEncoder) BeginRenderPass(descriptor *RenderPassDescriptor) *Rend
 
 			for i, v := range descriptor.ColorAttachments {
 				colorAttachment := C.WGPURenderPassColorAttachment{
-					loadOp:  C.WGPULoadOp(v.LoadOp),
-					storeOp: C.WGPUStoreOp(v.StoreOp),
+					loadOp:     C.WGPULoadOp(v.LoadOp),
+					storeOp:    C.WGPUStoreOp(v.StoreOp),
+					depthSlice: C.WGPU_DEPTH_SLICE_UNDEFINED,
 					clearValue: C.WGPUColor{
 						r: C.double(v.ClearValue.R),
 						g: C.double(v.ClearValue.G),
