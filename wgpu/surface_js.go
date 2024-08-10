@@ -16,7 +16,7 @@ type Surface struct {
 func (g Surface) GetCapabilities(adapter *Adapter) (ret SurfaceCapabilities) {
 	// Based on https://developer.mozilla.org/en-US/docs/Web/API/GPUCanvasContext/configure
 	ret.Formats = []TextureFormat{TextureFormatBGRA8Unorm, TextureFormatRGBA8Unorm, TextureFormatRGBA16Float}
-	ret.AlphaModes = []CompositeAlphaMode{CompositeAlphaModeOpaque, CompositeAlphaModePreMultiplied}
+	ret.AlphaModes = []CompositeAlphaMode{CompositeAlphaModeOpaque, CompositeAlphaModePremultiplied}
 	ret.PresentModes = []PresentMode{PresentModeImmediate}
 	return
 }

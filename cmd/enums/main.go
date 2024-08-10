@@ -72,11 +72,6 @@ func (e Enums) Add(t string, enum string, value int64) Enums {
 	return e
 }
 
-// customEnumStrings consistent with JS.
-var customEnumStrings = map[string]string{
-	"pre-multiplied": "premultiplied",
-}
-
 func main() {
 	flag.Parse()
 
@@ -190,11 +185,7 @@ loop:
 				}
 				b.WriteRune(r)
 			}
-			str = b.String()
-			if c, ok := customEnumStrings[str]; ok {
-				str = c
-			}
-			fmt.Fprintf(w, "return \"%s\"\n", str)
+			fmt.Fprintf(w, "return \"%s\"\n", b.String())
 		}
 		if e.Name == "ErrorType" {
 			fmt.Fprintf(w, "default:\n")
