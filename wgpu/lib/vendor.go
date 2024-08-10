@@ -1,6 +1,6 @@
 package lib
 
-// NOTE: this is for `go mod vendor` and does not affect binary size.
+// NOTE: these imports are for `go mod vendor` and do not affect binary sizes.
 
 import (
 	_ "github.com/cogentcore/webgpu/wgpu/lib/android/386"
