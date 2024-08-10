@@ -17,9 +17,13 @@ package wgpu
 
 #cgo linux,!android LDFLAGS: -lm -ldl
 
+// iOS
+#cgo ios,amd64 LDFLAGS: -L${SRCDIR}/lib/ios/amd64 -lwgpu_native
+#cgo ios,arm64 LDFLAGS: -L${SRCDIR}/lib/ios/arm64 -lwgpu_native
+
 // Darwin
-#cgo darwin,amd64 LDFLAGS: -L${SRCDIR}/lib/darwin/amd64 -lwgpu_native
-#cgo darwin,arm64 LDFLAGS: -L${SRCDIR}/lib/darwin/arm64 -lwgpu_native
+#cgo darwin,!ios,amd64 LDFLAGS: -L${SRCDIR}/lib/darwin/amd64 -lwgpu_native
+#cgo darwin,!ios,arm64 LDFLAGS: -L${SRCDIR}/lib/darwin/arm64 -lwgpu_native
 
 #cgo darwin LDFLAGS: -framework QuartzCore -framework Metal
 
