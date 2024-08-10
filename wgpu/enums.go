@@ -410,11 +410,11 @@ func (v CompilationMessageType) String() string {
 type CompositeAlphaMode uint32
 
 const (
-	CompositeAlphaModeAuto           CompositeAlphaMode = 0x00000000
-	CompositeAlphaModeOpaque         CompositeAlphaMode = 0x00000001
-	CompositeAlphaModePreMultiplied  CompositeAlphaMode = 0x00000002
-	CompositeAlphaModePostMultiplied CompositeAlphaMode = 0x00000003
-	CompositeAlphaModeInherit        CompositeAlphaMode = 0x00000004
+	CompositeAlphaModeAuto            CompositeAlphaMode = 0x00000000
+	CompositeAlphaModeOpaque          CompositeAlphaMode = 0x00000001
+	CompositeAlphaModePremultiplied   CompositeAlphaMode = 0x00000002
+	CompositeAlphaModeUnpremultiplied CompositeAlphaMode = 0x00000003
+	CompositeAlphaModeInherit         CompositeAlphaMode = 0x00000004
 )
 
 func (v CompositeAlphaMode) String() string {
@@ -423,30 +423,12 @@ func (v CompositeAlphaMode) String() string {
 		return "auto"
 	case CompositeAlphaModeOpaque:
 		return "opaque"
-	case CompositeAlphaModePreMultiplied:
+	case CompositeAlphaModePremultiplied:
 		return "premultiplied"
-	case CompositeAlphaModePostMultiplied:
-		return "post-multiplied"
+	case CompositeAlphaModeUnpremultiplied:
+		return "unpremultiplied"
 	case CompositeAlphaModeInherit:
 		return "inherit"
-	default:
-		return ""
-	}
-}
-
-type ComputePassTimestampLocation uint32
-
-const (
-	ComputePassTimestampLocationBeginning ComputePassTimestampLocation = 0x00000000
-	ComputePassTimestampLocationEnd       ComputePassTimestampLocation = 0x00000001
-)
-
-func (v ComputePassTimestampLocation) String() string {
-	switch v {
-	case ComputePassTimestampLocationBeginning:
-		return "beginning"
-	case ComputePassTimestampLocationEnd:
-		return "end"
 	default:
 		return ""
 	}
@@ -506,14 +488,14 @@ func (v CullMode) String() string {
 type DeviceLostReason uint32
 
 const (
-	DeviceLostReasonUndefined DeviceLostReason = 0x00000000
-	DeviceLostReasonDestroyed DeviceLostReason = 0x00000001
+	DeviceLostReasonUnknown   DeviceLostReason = 0x00000001
+	DeviceLostReasonDestroyed DeviceLostReason = 0x00000002
 )
 
 func (v DeviceLostReason) String() string {
 	switch v {
-	case DeviceLostReasonUndefined:
-		return "undefined"
+	case DeviceLostReasonUnknown:
+		return "unknown"
 	case DeviceLostReasonDestroyed:
 		return "destroyed"
 	default:
@@ -596,24 +578,42 @@ func (v ErrorType) String() string {
 type FeatureName uint32
 
 const (
-	FeatureNameUndefined                              FeatureName = 0x00000000
-	FeatureNameDepthClipControl                       FeatureName = 0x00000001
-	FeatureNameDepth32FloatStencil8                   FeatureName = 0x00000002
-	FeatureNameTimestampQuery                         FeatureName = 0x00000003
-	FeatureNamePipelineStatisticsQuery                FeatureName = 0x00000004
-	FeatureNameTextureCompressionBC                   FeatureName = 0x00000005
-	FeatureNameTextureCompressionETC2                 FeatureName = 0x00000006
-	FeatureNameTextureCompressionASTC                 FeatureName = 0x00000007
-	FeatureNameIndirectFirstInstance                  FeatureName = 0x00000008
-	FeatureNameShaderF16                              FeatureName = 0x00000009
-	FeatureNameRG11B10UfloatRenderable                FeatureName = 0x0000000A
-	FeatureNameBGRA8UnormStorage                      FeatureName = 0x0000000B
-	FeatureNameFloat32Filterable                      FeatureName = 0x0000000C
-	NativeFeaturePushConstants                        FeatureName = 0x60000001
-	NativeFeatureTextureAdapterSpecificFormatFeatures FeatureName = 0x60000002
-	NativeFeatureMultiDrawIndirect                    FeatureName = 0x60000003
-	NativeFeatureMultiDrawIndirectCount               FeatureName = 0x60000004
-	NativeFeatureVertexWritableStorage                FeatureName = 0x60000005
+	FeatureNameUndefined                                               FeatureName = 0x00000000
+	FeatureNameDepthClipControl                                        FeatureName = 0x00000001
+	FeatureNameDepth32FloatStencil8                                    FeatureName = 0x00000002
+	FeatureNameTimestampQuery                                          FeatureName = 0x00000003
+	FeatureNameTextureCompressionBC                                    FeatureName = 0x00000004
+	FeatureNameTextureCompressionETC2                                  FeatureName = 0x00000005
+	FeatureNameTextureCompressionASTC                                  FeatureName = 0x00000006
+	FeatureNameIndirectFirstInstance                                   FeatureName = 0x00000007
+	FeatureNameShaderF16                                               FeatureName = 0x00000008
+	FeatureNameRG11B10UfloatRenderable                                 FeatureName = 0x00000009
+	FeatureNameBGRA8UnormStorage                                       FeatureName = 0x0000000A
+	FeatureNameFloat32Filterable                                       FeatureName = 0x0000000B
+	NativeFeaturePushConstants                                         FeatureName = 0x00030001
+	NativeFeatureTextureAdapterSpecificFormatFeatures                  FeatureName = 0x00030002
+	NativeFeatureMultiDrawIndirect                                     FeatureName = 0x00030003
+	NativeFeatureMultiDrawIndirectCount                                FeatureName = 0x00030004
+	NativeFeatureVertexWritableStorage                                 FeatureName = 0x00030005
+	NativeFeatureTextureBindingArray                                   FeatureName = 0x00030006
+	NativeFeatureSampledTextureAndStorageBufferArrayNonUniformIndexing FeatureName = 0x00030007
+	NativeFeaturePipelineStatisticsQuery                               FeatureName = 0x00030008
+	NativeFeatureStorageResourceBindingArray                           FeatureName = 0x00030009
+	NativeFeaturePartiallyBoundBindingArray                            FeatureName = 0x0003000A
+	NativeFeatureTextureFormat16bitNorm                                FeatureName = 0x0003000B
+	NativeFeatureTextureCompressionAstcHdr                             FeatureName = 0x0003000C
+	NativeFeatureMappablePrimaryBuffers                                FeatureName = 0x0003000E
+	NativeFeatureBufferBindingArray                                    FeatureName = 0x0003000F
+	NativeFeatureUniformBufferAndStorageTextureArrayNonUniformIndexing FeatureName = 0x00030010
+	NativeFeatureVertexAttribute64bit                                  FeatureName = 0x00030019
+	NativeFeatureShaderUnusedVertexOutput                              FeatureName = 0x0003001A
+	NativeFeatureTextureFormatNv12                                     FeatureName = 0x0003001B
+	NativeFeatureRayTracingAccelerationStructure                       FeatureName = 0x0003001C
+	NativeFeatureRayQuery                                              FeatureName = 0x0003001D
+	NativeFeatureShaderF64                                             FeatureName = 0x0003001E
+	NativeFeatureShaderI16                                             FeatureName = 0x0003001F
+	NativeFeatureShaderPrimitiveIndex                                  FeatureName = 0x00030020
+	NativeFeatureShaderEarlyDepthTest                                  FeatureName = 0x00030021
 )
 
 func (v FeatureName) String() string {
@@ -626,8 +626,6 @@ func (v FeatureName) String() string {
 		return "depth32float-stencil8"
 	case FeatureNameTimestampQuery:
 		return "timestamp-query"
-	case FeatureNamePipelineStatisticsQuery:
-		return "pipeline-statistics-query"
 	case FeatureNameTextureCompressionBC:
 		return "texture-compression-bc"
 	case FeatureNameTextureCompressionETC2:
@@ -654,6 +652,44 @@ func (v FeatureName) String() string {
 		return "native-feature-multi-draw-indirect-count"
 	case NativeFeatureVertexWritableStorage:
 		return "native-feature-vertex-writable-storage"
+	case NativeFeatureTextureBindingArray:
+		return "native-feature-texture-binding-array"
+	case NativeFeatureSampledTextureAndStorageBufferArrayNonUniformIndexing:
+		return "native-feature-sampled-texture-and-storage-buffer-array-non-uniform-indexing"
+	case NativeFeaturePipelineStatisticsQuery:
+		return "native-feature-pipeline-statistics-query"
+	case NativeFeatureStorageResourceBindingArray:
+		return "native-feature-storage-resource-binding-array"
+	case NativeFeaturePartiallyBoundBindingArray:
+		return "native-feature-partially-bound-binding-array"
+	case NativeFeatureTextureFormat16bitNorm:
+		return "native-feature-texture-format16bit-norm"
+	case NativeFeatureTextureCompressionAstcHdr:
+		return "native-feature-texture-compression-astc-hdr"
+	case NativeFeatureMappablePrimaryBuffers:
+		return "native-feature-mappable-primary-buffers"
+	case NativeFeatureBufferBindingArray:
+		return "native-feature-buffer-binding-array"
+	case NativeFeatureUniformBufferAndStorageTextureArrayNonUniformIndexing:
+		return "native-feature-uniform-buffer-and-storage-texture-array-non-uniform-indexing"
+	case NativeFeatureVertexAttribute64bit:
+		return "native-feature-vertex-attribute64bit"
+	case NativeFeatureShaderUnusedVertexOutput:
+		return "native-feature-shader-unused-vertex-output"
+	case NativeFeatureTextureFormatNv12:
+		return "native-feature-texture-format-nv12"
+	case NativeFeatureRayTracingAccelerationStructure:
+		return "native-feature-ray-tracing-acceleration-structure"
+	case NativeFeatureRayQuery:
+		return "native-feature-ray-query"
+	case NativeFeatureShaderF64:
+		return "native-feature-shader-f64"
+	case NativeFeatureShaderI16:
+		return "native-feature-shader-i16"
+	case NativeFeatureShaderPrimitiveIndex:
+		return "native-feature-shader-primitive-index"
+	case NativeFeatureShaderEarlyDepthTest:
+		return "native-feature-shader-early-depth-test"
 	default:
 		return ""
 	}
@@ -695,6 +731,30 @@ func (v FrontFace) String() string {
 	}
 }
 
+type Gles3MinorVersion uint32
+
+const (
+	Gles3MinorVersionAutomatic Gles3MinorVersion = 0x00000000
+	Gles3MinorVersionVersion0  Gles3MinorVersion = 0x00000001
+	Gles3MinorVersionVersion1  Gles3MinorVersion = 0x00000002
+	Gles3MinorVersionVersion2  Gles3MinorVersion = 0x00000003
+)
+
+func (v Gles3MinorVersion) String() string {
+	switch v {
+	case Gles3MinorVersionAutomatic:
+		return "automatic"
+	case Gles3MinorVersionVersion0:
+		return "version0"
+	case Gles3MinorVersionVersion1:
+		return "version1"
+	case Gles3MinorVersionVersion2:
+		return "version2"
+	default:
+		return ""
+	}
+}
+
 type IndexFormat uint32
 
 const (
@@ -719,37 +779,61 @@ func (v IndexFormat) String() string {
 type InstanceBackend uint32
 
 const (
-	InstanceBackendNone          InstanceBackend = 0x00000000
-	InstanceBackendVulkan        InstanceBackend = 0x00000002
+	InstanceBackendAll           InstanceBackend = 0x00000000
+	InstanceBackendVulkan        InstanceBackend = 0x00000001
+	InstanceBackendGL            InstanceBackend = 0x00000002
 	InstanceBackendMetal         InstanceBackend = 0x00000004
 	InstanceBackendDX12          InstanceBackend = 0x00000008
 	InstanceBackendDX11          InstanceBackend = 0x00000010
-	InstanceBackendGL            InstanceBackend = 0x00000020
-	InstanceBackendSecondary     InstanceBackend = 0x00000030
-	InstanceBackendBrowserWebGPU InstanceBackend = 0x00000040
-	InstanceBackendPrimary       InstanceBackend = 0x0000004E
+	InstanceBackendSecondary     InstanceBackend = 0x00000012
+	InstanceBackendBrowserWebGPU InstanceBackend = 0x00000020
+	InstanceBackendPrimary       InstanceBackend = 0x0000002D
 )
 
 func (v InstanceBackend) String() string {
 	switch v {
-	case InstanceBackendNone:
-		return "none"
+	case InstanceBackendAll:
+		return "all"
 	case InstanceBackendVulkan:
 		return "vulkan"
+	case InstanceBackendGL:
+		return "gl"
 	case InstanceBackendMetal:
 		return "metal"
 	case InstanceBackendDX12:
 		return "dx12"
 	case InstanceBackendDX11:
 		return "dx11"
-	case InstanceBackendGL:
-		return "gl"
 	case InstanceBackendSecondary:
 		return "secondary"
 	case InstanceBackendBrowserWebGPU:
 		return "browser-web-gpu"
 	case InstanceBackendPrimary:
 		return "primary"
+	default:
+		return ""
+	}
+}
+
+type InstanceFlag uint32
+
+const (
+	InstanceFlagDefault          InstanceFlag = 0x00000000
+	InstanceFlagDebug            InstanceFlag = 0x00000001
+	InstanceFlagValidation       InstanceFlag = 0x00000002
+	InstanceFlagDiscardHalLabels InstanceFlag = 0x00000004
+)
+
+func (v InstanceFlag) String() string {
+	switch v {
+	case InstanceFlagDefault:
+		return "default"
+	case InstanceFlagDebug:
+		return "debug"
+	case InstanceFlagValidation:
+		return "validation"
+	case InstanceFlagDiscardHalLabels:
+		return "discard-hal-labels"
 	default:
 		return ""
 	}
@@ -845,6 +929,52 @@ func (v MipmapFilterMode) String() string {
 	}
 }
 
+type NativeQueryType uint32
+
+const NativeQueryTypePipelineStatistics NativeQueryType = 0x00030000
+
+func (v NativeQueryType) String() string {
+	switch v {
+	case NativeQueryTypePipelineStatistics:
+		return "pipeline-statistics"
+	default:
+		return ""
+	}
+}
+
+type NativeTextureFormat uint32
+
+const (
+	NativeTextureFormatR16Unorm    NativeTextureFormat = 0x00030001
+	NativeTextureFormatR16Snorm    NativeTextureFormat = 0x00030002
+	NativeTextureFormatRg16Unorm   NativeTextureFormat = 0x00030003
+	NativeTextureFormatRg16Snorm   NativeTextureFormat = 0x00030004
+	NativeTextureFormatRgba16Unorm NativeTextureFormat = 0x00030005
+	NativeTextureFormatRgba16Snorm NativeTextureFormat = 0x00030006
+	NativeTextureFormatNV12        NativeTextureFormat = 0x00030007
+)
+
+func (v NativeTextureFormat) String() string {
+	switch v {
+	case NativeTextureFormatR16Unorm:
+		return "r16unorm"
+	case NativeTextureFormatR16Snorm:
+		return "r16snorm"
+	case NativeTextureFormatRg16Unorm:
+		return "rg16unorm"
+	case NativeTextureFormatRg16Snorm:
+		return "rg16snorm"
+	case NativeTextureFormatRgba16Unorm:
+		return "rgba16unorm"
+	case NativeTextureFormatRgba16Snorm:
+		return "rgba16snorm"
+	case NativeTextureFormatNV12:
+		return "nv12"
+	default:
+		return ""
+	}
+}
+
 type PipelineStatisticName uint32
 
 const (
@@ -896,19 +1026,22 @@ func (v PowerPreference) String() string {
 type PresentMode uint32
 
 const (
-	PresentModeImmediate PresentMode = 0x00000000
-	PresentModeMailbox   PresentMode = 0x00000001
-	PresentModeFifo      PresentMode = 0x00000002
+	PresentModeFifo        PresentMode = 0x00000000
+	PresentModeFifoRelaxed PresentMode = 0x00000001
+	PresentModeImmediate   PresentMode = 0x00000002
+	PresentModeMailbox     PresentMode = 0x00000003
 )
 
 func (v PresentMode) String() string {
 	switch v {
+	case PresentModeFifo:
+		return "fifo"
+	case PresentModeFifoRelaxed:
+		return "fifo-relaxed"
 	case PresentModeImmediate:
 		return "immediate"
 	case PresentModeMailbox:
 		return "mailbox"
-	case PresentModeFifo:
-		return "fifo"
 	default:
 		return ""
 	}
@@ -944,17 +1077,14 @@ func (v PrimitiveTopology) String() string {
 type QueryType uint32
 
 const (
-	QueryTypeOcclusion          QueryType = 0x00000000
-	QueryTypePipelineStatistics QueryType = 0x00000001
-	QueryTypeTimestamp          QueryType = 0x00000002
+	QueryTypeOcclusion QueryType = 0x00000000
+	QueryTypeTimestamp QueryType = 0x00000001
 )
 
 func (v QueryType) String() string {
 	switch v {
 	case QueryTypeOcclusion:
 		return "occlusion"
-	case QueryTypePipelineStatistics:
-		return "pipeline-statistics"
 	case QueryTypeTimestamp:
 		return "timestamp"
 	default:
@@ -981,24 +1111,6 @@ func (v QueueWorkDoneStatus) String() string {
 		return "unknown"
 	case QueueWorkDoneStatusDeviceLost:
 		return "device-lost"
-	default:
-		return ""
-	}
-}
-
-type RenderPassTimestampLocation uint32
-
-const (
-	RenderPassTimestampLocationBeginning RenderPassTimestampLocation = 0x00000000
-	RenderPassTimestampLocationEnd       RenderPassTimestampLocation = 0x00000001
-)
-
-func (v RenderPassTimestampLocation) String() string {
-	switch v {
-	case RenderPassTimestampLocationBeginning:
-		return "beginning"
-	case RenderPassTimestampLocationEnd:
-		return "end"
 	default:
 		return ""
 	}
@@ -1138,6 +1250,8 @@ type StorageTextureAccess uint32
 const (
 	StorageTextureAccessUndefined StorageTextureAccess = 0x00000000
 	StorageTextureAccessWriteOnly StorageTextureAccess = 0x00000001
+	StorageTextureAccessReadOnly  StorageTextureAccess = 0x00000002
+	StorageTextureAccessReadWrite StorageTextureAccess = 0x00000003
 )
 
 func (v StorageTextureAccess) String() string {
@@ -1146,6 +1260,10 @@ func (v StorageTextureAccess) String() string {
 		return "undefined"
 	case StorageTextureAccessWriteOnly:
 		return "write-only"
+	case StorageTextureAccessReadOnly:
+		return "read-only"
+	case StorageTextureAccessReadWrite:
+		return "read-write"
 	default:
 		return ""
 	}
@@ -1167,6 +1285,36 @@ func (v StoreOp) String() string {
 		return "store"
 	case StoreOpDiscard:
 		return "discard"
+	default:
+		return ""
+	}
+}
+
+type SurfaceGetCurrentTextureStatus uint32
+
+const (
+	SurfaceGetCurrentTextureStatusSuccess     SurfaceGetCurrentTextureStatus = 0x00000000
+	SurfaceGetCurrentTextureStatusTimeout     SurfaceGetCurrentTextureStatus = 0x00000001
+	SurfaceGetCurrentTextureStatusOutdated    SurfaceGetCurrentTextureStatus = 0x00000002
+	SurfaceGetCurrentTextureStatusLost        SurfaceGetCurrentTextureStatus = 0x00000003
+	SurfaceGetCurrentTextureStatusOutOfMemory SurfaceGetCurrentTextureStatus = 0x00000004
+	SurfaceGetCurrentTextureStatusDeviceLost  SurfaceGetCurrentTextureStatus = 0x00000005
+)
+
+func (v SurfaceGetCurrentTextureStatus) String() string {
+	switch v {
+	case SurfaceGetCurrentTextureStatusSuccess:
+		return "success"
+	case SurfaceGetCurrentTextureStatusTimeout:
+		return "timeout"
+	case SurfaceGetCurrentTextureStatusOutdated:
+		return "outdated"
+	case SurfaceGetCurrentTextureStatusLost:
+		return "lost"
+	case SurfaceGetCurrentTextureStatusOutOfMemory:
+		return "out-of-memory"
+	case SurfaceGetCurrentTextureStatusDeviceLost:
+		return "device-lost"
 	default:
 		return ""
 	}
@@ -1242,76 +1390,77 @@ const (
 	TextureFormatRGBA8Sint            TextureFormat = 0x00000016
 	TextureFormatBGRA8Unorm           TextureFormat = 0x00000017
 	TextureFormatBGRA8UnormSrgb       TextureFormat = 0x00000018
-	TextureFormatRGB10A2Unorm         TextureFormat = 0x00000019
-	TextureFormatRG11B10Ufloat        TextureFormat = 0x0000001A
-	TextureFormatRGB9E5Ufloat         TextureFormat = 0x0000001B
-	TextureFormatRG32Float            TextureFormat = 0x0000001C
-	TextureFormatRG32Uint             TextureFormat = 0x0000001D
-	TextureFormatRG32Sint             TextureFormat = 0x0000001E
-	TextureFormatRGBA16Uint           TextureFormat = 0x0000001F
-	TextureFormatRGBA16Sint           TextureFormat = 0x00000020
-	TextureFormatRGBA16Float          TextureFormat = 0x00000021
-	TextureFormatRGBA32Float          TextureFormat = 0x00000022
-	TextureFormatRGBA32Uint           TextureFormat = 0x00000023
-	TextureFormatRGBA32Sint           TextureFormat = 0x00000024
-	TextureFormatStencil8             TextureFormat = 0x00000025
-	TextureFormatDepth16Unorm         TextureFormat = 0x00000026
-	TextureFormatDepth24Plus          TextureFormat = 0x00000027
-	TextureFormatDepth24PlusStencil8  TextureFormat = 0x00000028
-	TextureFormatDepth32Float         TextureFormat = 0x00000029
-	TextureFormatDepth32FloatStencil8 TextureFormat = 0x0000002A
-	TextureFormatBC1RGBAUnorm         TextureFormat = 0x0000002B
-	TextureFormatBC1RGBAUnormSrgb     TextureFormat = 0x0000002C
-	TextureFormatBC2RGBAUnorm         TextureFormat = 0x0000002D
-	TextureFormatBC2RGBAUnormSrgb     TextureFormat = 0x0000002E
-	TextureFormatBC3RGBAUnorm         TextureFormat = 0x0000002F
-	TextureFormatBC3RGBAUnormSrgb     TextureFormat = 0x00000030
-	TextureFormatBC4RUnorm            TextureFormat = 0x00000031
-	TextureFormatBC4RSnorm            TextureFormat = 0x00000032
-	TextureFormatBC5RGUnorm           TextureFormat = 0x00000033
-	TextureFormatBC5RGSnorm           TextureFormat = 0x00000034
-	TextureFormatBC6HRGBUfloat        TextureFormat = 0x00000035
-	TextureFormatBC6HRGBFloat         TextureFormat = 0x00000036
-	TextureFormatBC7RGBAUnorm         TextureFormat = 0x00000037
-	TextureFormatBC7RGBAUnormSrgb     TextureFormat = 0x00000038
-	TextureFormatETC2RGB8Unorm        TextureFormat = 0x00000039
-	TextureFormatETC2RGB8UnormSrgb    TextureFormat = 0x0000003A
-	TextureFormatETC2RGB8A1Unorm      TextureFormat = 0x0000003B
-	TextureFormatETC2RGB8A1UnormSrgb  TextureFormat = 0x0000003C
-	TextureFormatETC2RGBA8Unorm       TextureFormat = 0x0000003D
-	TextureFormatETC2RGBA8UnormSrgb   TextureFormat = 0x0000003E
-	TextureFormatEACR11Unorm          TextureFormat = 0x0000003F
-	TextureFormatEACR11Snorm          TextureFormat = 0x00000040
-	TextureFormatEACRG11Unorm         TextureFormat = 0x00000041
-	TextureFormatEACRG11Snorm         TextureFormat = 0x00000042
-	TextureFormatASTC4x4Unorm         TextureFormat = 0x00000043
-	TextureFormatASTC4x4UnormSrgb     TextureFormat = 0x00000044
-	TextureFormatASTC5x4Unorm         TextureFormat = 0x00000045
-	TextureFormatASTC5x4UnormSrgb     TextureFormat = 0x00000046
-	TextureFormatASTC5x5Unorm         TextureFormat = 0x00000047
-	TextureFormatASTC5x5UnormSrgb     TextureFormat = 0x00000048
-	TextureFormatASTC6x5Unorm         TextureFormat = 0x00000049
-	TextureFormatASTC6x5UnormSrgb     TextureFormat = 0x0000004A
-	TextureFormatASTC6x6Unorm         TextureFormat = 0x0000004B
-	TextureFormatASTC6x6UnormSrgb     TextureFormat = 0x0000004C
-	TextureFormatASTC8x5Unorm         TextureFormat = 0x0000004D
-	TextureFormatASTC8x5UnormSrgb     TextureFormat = 0x0000004E
-	TextureFormatASTC8x6Unorm         TextureFormat = 0x0000004F
-	TextureFormatASTC8x6UnormSrgb     TextureFormat = 0x00000050
-	TextureFormatASTC8x8Unorm         TextureFormat = 0x00000051
-	TextureFormatASTC8x8UnormSrgb     TextureFormat = 0x00000052
-	TextureFormatASTC10x5Unorm        TextureFormat = 0x00000053
-	TextureFormatASTC10x5UnormSrgb    TextureFormat = 0x00000054
-	TextureFormatASTC10x6Unorm        TextureFormat = 0x00000055
-	TextureFormatASTC10x6UnormSrgb    TextureFormat = 0x00000056
-	TextureFormatASTC10x8Unorm        TextureFormat = 0x00000057
-	TextureFormatASTC10x8UnormSrgb    TextureFormat = 0x00000058
-	TextureFormatASTC10x10Unorm       TextureFormat = 0x00000059
-	TextureFormatASTC10x10UnormSrgb   TextureFormat = 0x0000005A
-	TextureFormatASTC12x10Unorm       TextureFormat = 0x0000005B
-	TextureFormatASTC12x10UnormSrgb   TextureFormat = 0x0000005C
-	TextureFormatASTC12x12Unorm       TextureFormat = 0x0000005D
-	TextureFormatASTC12x12UnormSrgb   TextureFormat = 0x0000005E
+	TextureFormatRGB10A2Uint          TextureFormat = 0x00000019
+	TextureFormatRGB10A2Unorm         TextureFormat = 0x0000001A
+	TextureFormatRG11B10Ufloat        TextureFormat = 0x0000001B
+	TextureFormatRGB9E5Ufloat         TextureFormat = 0x0000001C
+	TextureFormatRG32Float            TextureFormat = 0x0000001D
+	TextureFormatRG32Uint             TextureFormat = 0x0000001E
+	TextureFormatRG32Sint             TextureFormat = 0x0000001F
+	TextureFormatRGBA16Uint           TextureFormat = 0x00000020
+	TextureFormatRGBA16Sint           TextureFormat = 0x00000021
+	TextureFormatRGBA16Float          TextureFormat = 0x00000022
+	TextureFormatRGBA32Float          TextureFormat = 0x00000023
+	TextureFormatRGBA32Uint           TextureFormat = 0x00000024
+	TextureFormatRGBA32Sint           TextureFormat = 0x00000025
+	TextureFormatStencil8             TextureFormat = 0x00000026
+	TextureFormatDepth16Unorm         TextureFormat = 0x00000027
+	TextureFormatDepth24Plus          TextureFormat = 0x00000028
+	TextureFormatDepth24PlusStencil8  TextureFormat = 0x00000029
+	TextureFormatDepth32Float         TextureFormat = 0x0000002A
+	TextureFormatDepth32FloatStencil8 TextureFormat = 0x0000002B
+	TextureFormatBC1RGBAUnorm         TextureFormat = 0x0000002C
+	TextureFormatBC1RGBAUnormSrgb     TextureFormat = 0x0000002D
+	TextureFormatBC2RGBAUnorm         TextureFormat = 0x0000002E
+	TextureFormatBC2RGBAUnormSrgb     TextureFormat = 0x0000002F
+	TextureFormatBC3RGBAUnorm         TextureFormat = 0x00000030
+	TextureFormatBC3RGBAUnormSrgb     TextureFormat = 0x00000031
+	TextureFormatBC4RUnorm            TextureFormat = 0x00000032
+	TextureFormatBC4RSnorm            TextureFormat = 0x00000033
+	TextureFormatBC5RGUnorm           TextureFormat = 0x00000034
+	TextureFormatBC5RGSnorm           TextureFormat = 0x00000035
+	TextureFormatBC6HRGBUfloat        TextureFormat = 0x00000036
+	TextureFormatBC6HRGBFloat         TextureFormat = 0x00000037
+	TextureFormatBC7RGBAUnorm         TextureFormat = 0x00000038
+	TextureFormatBC7RGBAUnormSrgb     TextureFormat = 0x00000039
+	TextureFormatETC2RGB8Unorm        TextureFormat = 0x0000003A
+	TextureFormatETC2RGB8UnormSrgb    TextureFormat = 0x0000003B
+	TextureFormatETC2RGB8A1Unorm      TextureFormat = 0x0000003C
+	TextureFormatETC2RGB8A1UnormSrgb  TextureFormat = 0x0000003D
+	TextureFormatETC2RGBA8Unorm       TextureFormat = 0x0000003E
+	TextureFormatETC2RGBA8UnormSrgb   TextureFormat = 0x0000003F
+	TextureFormatEACR11Unorm          TextureFormat = 0x00000040
+	TextureFormatEACR11Snorm          TextureFormat = 0x00000041
+	TextureFormatEACRG11Unorm         TextureFormat = 0x00000042
+	TextureFormatEACRG11Snorm         TextureFormat = 0x00000043
+	TextureFormatASTC4x4Unorm         TextureFormat = 0x00000044
+	TextureFormatASTC4x4UnormSrgb     TextureFormat = 0x00000045
+	TextureFormatASTC5x4Unorm         TextureFormat = 0x00000046
+	TextureFormatASTC5x4UnormSrgb     TextureFormat = 0x00000047
+	TextureFormatASTC5x5Unorm         TextureFormat = 0x00000048
+	TextureFormatASTC5x5UnormSrgb     TextureFormat = 0x00000049
+	TextureFormatASTC6x5Unorm         TextureFormat = 0x0000004A
+	TextureFormatASTC6x5UnormSrgb     TextureFormat = 0x0000004B
+	TextureFormatASTC6x6Unorm         TextureFormat = 0x0000004C
+	TextureFormatASTC6x6UnormSrgb     TextureFormat = 0x0000004D
+	TextureFormatASTC8x5Unorm         TextureFormat = 0x0000004E
+	TextureFormatASTC8x5UnormSrgb     TextureFormat = 0x0000004F
+	TextureFormatASTC8x6Unorm         TextureFormat = 0x00000050
+	TextureFormatASTC8x6UnormSrgb     TextureFormat = 0x00000051
+	TextureFormatASTC8x8Unorm         TextureFormat = 0x00000052
+	TextureFormatASTC8x8UnormSrgb     TextureFormat = 0x00000053
+	TextureFormatASTC10x5Unorm        TextureFormat = 0x00000054
+	TextureFormatASTC10x5UnormSrgb    TextureFormat = 0x00000055
+	TextureFormatASTC10x6Unorm        TextureFormat = 0x00000056
+	TextureFormatASTC10x6UnormSrgb    TextureFormat = 0x00000057
+	TextureFormatASTC10x8Unorm        TextureFormat = 0x00000058
+	TextureFormatASTC10x8UnormSrgb    TextureFormat = 0x00000059
+	TextureFormatASTC10x10Unorm       TextureFormat = 0x0000005A
+	TextureFormatASTC10x10UnormSrgb   TextureFormat = 0x0000005B
+	TextureFormatASTC12x10Unorm       TextureFormat = 0x0000005C
+	TextureFormatASTC12x10UnormSrgb   TextureFormat = 0x0000005D
+	TextureFormatASTC12x12Unorm       TextureFormat = 0x0000005E
+	TextureFormatASTC12x12UnormSrgb   TextureFormat = 0x0000005F
 )
 
 func (v TextureFormat) String() string {
@@ -1366,6 +1515,8 @@ func (v TextureFormat) String() string {
 		return "bgra8unorm"
 	case TextureFormatBGRA8UnormSrgb:
 		return "bgra8unorm-srgb"
+	case TextureFormatRGB10A2Uint:
+		return "rgb10a2uint"
 	case TextureFormatRGB10A2Unorm:
 		return "rgb10a2unorm"
 	case TextureFormatRG11B10Ufloat:
@@ -1725,6 +1876,33 @@ func (v VertexStepMode) String() string {
 		return "instance"
 	case VertexStepModeVertexBufferNotUsed:
 		return "vertex-buffer-not-used"
+	default:
+		return ""
+	}
+}
+
+type WGSLFeatureName uint32
+
+const (
+	WGSLFeatureNameUndefined                           WGSLFeatureName = 0x00000000
+	WGSLFeatureNameReadonlyAndReadwriteStorageTextures WGSLFeatureName = 0x00000001
+	WGSLFeatureNamePacked4x8IntegerDotProduct          WGSLFeatureName = 0x00000002
+	WGSLFeatureNameUnrestrictedPointerParameters       WGSLFeatureName = 0x00000003
+	WGSLFeatureNamePointerCompositeAccess              WGSLFeatureName = 0x00000004
+)
+
+func (v WGSLFeatureName) String() string {
+	switch v {
+	case WGSLFeatureNameUndefined:
+		return "undefined"
+	case WGSLFeatureNameReadonlyAndReadwriteStorageTextures:
+		return "readonly-and-readwrite-storage-textures"
+	case WGSLFeatureNamePacked4x8IntegerDotProduct:
+		return "packed4x8integer-dot-product"
+	case WGSLFeatureNameUnrestrictedPointerParameters:
+		return "unrestricted-pointer-parameters"
+	case WGSLFeatureNamePointerCompositeAccess:
+		return "pointer-composite-access"
 	default:
 		return ""
 	}
