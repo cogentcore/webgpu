@@ -40,13 +40,13 @@ package wgpu
 void logCallback_cgo(WGPULogLevel level, char const *msg) {
 	switch (level) {
 	case WGPULogLevel_Error:
-		__android_log_write(ANDROID_LOG_ERROR, "GoLog", "[wgpu] "+msg);
+		__android_log_write(ANDROID_LOG_ERROR, "GoLogWGPU", msg);
 		break;
 	case WGPULogLevel_Warn:
-		__android_log_write(ANDROID_LOG_WARN, "GoLog", "[wgpu] "+msg);
+		__android_log_write(ANDROID_LOG_WARN, "GoLogWGPU", msg);
 		break;
 	default:
-		__android_log_write(ANDROID_LOG_INFO, "GoLog", "[wgpu] "+msg);
+		__android_log_write(ANDROID_LOG_INFO, "GoLogWGPU", msg);
 		break;
 	}
 }
