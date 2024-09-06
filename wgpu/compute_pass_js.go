@@ -63,3 +63,5 @@ func (g ComputePassEncoder) DispatchWorkgroups(workgroupCountX, workgroupCountY,
 func (g ComputePassEncoder) End() {
 	g.jsValue.Call("end")
 }
+
+func (g ComputePassEncoder) Release() {} // no-op

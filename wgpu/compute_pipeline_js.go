@@ -29,3 +29,5 @@ type ComputePipeline struct {
 func (g ComputePipeline) toJS() any {
 	return g.jsValue
 }
+
+func (g ComputePipeline) Release() {} // no-op
