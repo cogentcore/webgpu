@@ -28,16 +28,14 @@ func (g Queue) Submit(commandBuffers ...*CommandBuffer) {
 // WriteBuffer as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpuqueue-writebuffer
 func (g Queue) WriteBuffer(buffer *Buffer, offset uint64, data []byte) (err error) {
-	dataSize := stageBufferData(data)
-	g.jsValue.Call("writeBuffer", pointerToJS(buffer), offset, uint8Array, uint64(0), dataSize)
+	g.jsValue.Call("writeBuffer", pointerToJS(buffer), offset, BytesToJS(data), uint64(0), len(data))
 	return
 }
 
 // WriteTexture as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpuqueue-writetexture
 func (g Queue) WriteTexture(destination *ImageCopyTexture, data []byte, dataLayout *TextureDataLayout, writeSize *Extent3D) (err error) {
-	stageBufferData(data)
-	g.jsValue.Call("writeTexture", pointerToJS(destination), uint8Array, pointerToJS(dataLayout), pointerToJS(writeSize))
+	g.jsValue.Call("writeTexture", pointerToJS(destination), BytesToJS(data), pointerToJS(dataLayout), pointerToJS(writeSize))
 	return
 }
 
