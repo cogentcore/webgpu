@@ -368,14 +368,6 @@ type ConstantEntry struct {
 	Value float64
 }
 
-type ProgrammableStageDescriptor struct {
-	Module     *ShaderModule
-	EntryPoint string
-
-	// unused in wgpu
-	// Constants  []ConstantEntry
-}
-
 type ComputePipelineDescriptor struct {
 	Label   string
 	Layout  *PipelineLayout

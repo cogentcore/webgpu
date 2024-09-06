@@ -10,7 +10,7 @@ import (
 // https://gpuweb.github.io/gpuweb/#dictdef-gpucomputepipelinedescriptor
 type ComputePipelineDescriptor struct {
 	Layout  *PipelineLayout
-	Compute ProgrammableStage
+	Compute ProgrammableStageDescriptor
 }
 
 func (g ComputePipelineDescriptor) toJS() any {

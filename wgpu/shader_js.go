@@ -4,20 +4,6 @@ package wgpu
 
 import "syscall/js"
 
-// ProgrammableStage as described:
-// https://gpuweb.github.io/gpuweb/#gpuprogrammablestage
-type ProgrammableStage struct {
-	Module     *ShaderModule
-	EntryPoint string
-}
-
-func (g ProgrammableStage) toJS() any {
-	return map[string]any{
-		"module":     pointerToJS(g.Module),
-		"entryPoint": g.EntryPoint,
-	}
-}
-
 // ShaderModuleDescriptor as described:
 // https://gpuweb.github.io/gpuweb/#dictdef-gpushadermoduledescriptor
 type ShaderModuleDescriptor struct {

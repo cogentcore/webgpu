@@ -303,3 +303,10 @@ type BindGroupEntry struct {
 	Sampler     *Sampler
 	TextureView *TextureView
 }
+
+// ProgrammableStageDescriptor as described:
+// https://gpuweb.github.io/gpuweb/#gpuprogrammablestage
+type ProgrammableStageDescriptor struct {
+	Module     *ShaderModule
+	EntryPoint string
+}

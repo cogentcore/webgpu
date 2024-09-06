@@ -218,6 +218,13 @@ func (g *SamplerDescriptor) toJS() any {
 	return result
 }
 
+func (g *ProgrammableStageDescriptor) toJS() any {
+	return map[string]any{
+		"module":     pointerToJS(g.Module),
+		"entryPoint": g.EntryPoint,
+	}
+}
+
 func limitsFromJS(j js.Value) Limits {
 	return Limits{
 		MaxTextureDimension1D:                     uint32(j.Get("maxTextureDimension1D").Int()),
