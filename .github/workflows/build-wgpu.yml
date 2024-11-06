@@ -113,7 +113,7 @@ jobs:
 
     steps:
       # Checkout
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -163,7 +163,7 @@ jobs:
 
           mv target/${{ matrix.target }}/release/libwgpu_native.a target/${{ matrix.target }}/release/${{ matrix.goos }}_${{ matrix.goarch }}_libwgpu_native.a
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wgpu-artifacts
           path: |
@@ -174,9 +174,9 @@ jobs:
     needs: build-wgpu
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: wgpu-artifacts
           path: ${{ github.workspace }}/tmp
@@ -212,11 +212,3 @@ jobs:
 
           rm -rf $GITHUB_WORKSPACE/tmp
           tree $GITHUB_WORKSPACE/wgpu
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
-        with:
-          commit-message: update `wgpu-native` library
-          branch-suffix: random
-          title: update `wgpu-native` library
-          body: auto-generated PR to update `wgpu-native` library
