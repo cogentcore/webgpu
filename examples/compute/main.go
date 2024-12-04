@@ -127,11 +127,11 @@ func main() {
 	defer encoder.Release()
 
 	computePass := encoder.BeginComputePass(nil)
-	defer computePass.Release()
 	computePass.SetPipeline(computePipeline)
 	computePass.SetBindGroup(0, bindGroup, nil)
 	computePass.DispatchWorkgroups(uint32(len(numbers)), 1, 1)
 	computePass.End()
+	computePass.Release() // <- must call this before doing submit: https://github.com/gfx-rs/wgpu/issues/6145 https://github.com/gfx-rs/wgpu-native/issues/412
 
 	encoder.CopyBufferToBuffer(storageBuffer, 0, stagingBuffer, 0, size)
 
@@ -139,7 +139,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer cmdBuffer.Release()
 	queue.Submit(cmdBuffer)
 
 	var status wgpu.BufferMapAsyncStatus

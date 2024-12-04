@@ -36,7 +36,9 @@ func (g ComputePassEncoder) SetBindGroup(index uint32, bindGroup *BindGroup, dyn
 	params := make([]any, 3)
 	params[0] = index
 	params[1] = pointerToJS(bindGroup)
-	params[2] = dynamicOffsets
+	params[2] = mapSlice(dynamicOffsets, func(offset uint32) any {
+		return offset
+	})
 	g.jsValue.Call("setBindGroup", params...)
 }
 

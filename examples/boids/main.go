@@ -319,11 +319,11 @@ func (s *State) Render() error {
 	defer commandEncoder.Release()
 
 	computePass := commandEncoder.BeginComputePass(nil)
-	defer computePass.Release()
 	computePass.SetPipeline(s.computePipeline)
 	computePass.SetBindGroup(0, s.particleBindGroups[s.frameNum%2], nil)
 	computePass.DispatchWorkgroups(s.workGroupCount, 1, 1)
 	computePass.End()
+	computePass.Release() // must release immediately
 
 	renderPass := commandEncoder.BeginRenderPass(&wgpu.RenderPassDescriptor{
 		ColorAttachments: []wgpu.RenderPassColorAttachment{
@@ -334,12 +334,12 @@ func (s *State) Render() error {
 			},
 		},
 	})
-	defer renderPass.Release()
 	renderPass.SetPipeline(s.renderPipeline)
 	renderPass.SetVertexBuffer(0, s.particleBuffers[(s.frameNum+1)%2], 0, wgpu.WholeSize)
 	renderPass.SetVertexBuffer(1, s.vertexBuffer, 0, wgpu.WholeSize)
 	renderPass.Draw(3, NumParticles, 0, 0)
 	renderPass.End()
+	renderPass.Release() // must release
 
 	s.frameNum += 1
 
