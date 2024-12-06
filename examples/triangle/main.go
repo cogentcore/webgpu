@@ -168,11 +168,11 @@ func (s *State) Render() error {
 			},
 		},
 	})
-	defer renderPass.Release()
 
 	renderPass.SetPipeline(s.pipeline)
 	renderPass.Draw(3, 1, 0, 0)
 	renderPass.End()
+	renderPass.Release() // must release
 
 	cmdBuffer, err := encoder.Finish(nil)
 	if err != nil {

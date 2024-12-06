@@ -367,7 +367,6 @@ func (s *State) Render() error {
 			},
 		},
 	})
-	defer renderPass.Release()
 
 	renderPass.SetPipeline(s.pipeline)
 	renderPass.SetBindGroup(0, s.bindGroup, nil)
@@ -375,6 +374,7 @@ func (s *State) Render() error {
 	renderPass.SetVertexBuffer(0, s.vertexBuf, 0, wgpu.WholeSize)
 	renderPass.DrawIndexed(uint32(len(indexData)), 1, 0, 0, 0)
 	renderPass.End()
+	renderPass.Release() // must release
 
 	cmdBuffer, err := encoder.Finish(nil)
 	if err != nil {
