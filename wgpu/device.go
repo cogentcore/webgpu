@@ -862,6 +862,8 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 				frag.targetCount = 0
 				frag.targets = nil
 			}
+			frag.constantCount = 0 // note: crashes on linux arm64 without setting this to 0
+			frag.constants = nil // even though wgpu doesn't even support it.
 
 			desc.fragment = frag
 		}

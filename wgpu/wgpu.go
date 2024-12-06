@@ -14,6 +14,7 @@ package wgpu
 
 // Linux
 #cgo linux,!android,amd64 LDFLAGS: -L${SRCDIR}/lib/linux/amd64 -lwgpu_native
+#cgo linux,!android,arm64 LDFLAGS: -L${SRCDIR}/lib/linux/arm64 -lwgpu_native
 
 #cgo linux,!android LDFLAGS: -lm -ldl
 
