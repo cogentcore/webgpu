@@ -159,6 +159,8 @@ type BindGroup struct {
 	jsValue js.Value
 }
 
+func (g BindGroup) Release() {} // no-op
+
 func (g BindGroup) toJS() any {
 	return g.jsValue
 }
