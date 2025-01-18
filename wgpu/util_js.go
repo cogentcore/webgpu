@@ -3,6 +3,7 @@
 package wgpu
 
 import (
+	"log/slog"
 	"syscall/js"
 	"unsafe"
 )
@@ -35,6 +36,10 @@ func await(promise js.Value) js.Value {
 	result := make(chan js.Value)
 	promise.Call("then", js.FuncOf(func(this js.Value, args []js.Value) any {
 		result <- args[0]
+		return nil
+	}), js.FuncOf(func(this js.Value, args []js.Value) any {
+		slog.Error("wgpu.await: promise rejected", "reason", args[0])
+		result <- js.Null()
 		return nil
 	}))
 	return <-result
