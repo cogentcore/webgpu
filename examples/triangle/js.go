@@ -17,7 +17,17 @@ func (w window) GetSize() (int, int) {
 }
 
 func main() {
-	s, err := InitState(&window{}, &wgpu.SurfaceDescriptor{})
+	document := js.Global().Get("document")
+	canvas := document.Call("createElement", "canvas")
+	document.Get("body").Call("appendChild", canvas)
+
+	w := &window{}
+	width, height := w.GetSize()
+	canvas.Set("width", width)
+	canvas.Set("height", height)
+	canvas.Set("style", "width:100vw; height:100vh")
+
+	s, err := InitState(w, &wgpu.SurfaceDescriptor{Canvas: canvas})
 	if err != nil {
 		panic(err)
 	}
