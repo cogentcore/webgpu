@@ -41,12 +41,19 @@ func (g Instance) EnumerateAdapters(options *InstanceEnumerateAdapterOptons) []*
 	return []*Adapter{a}
 }
 
+// SurfaceDescriptor must contain a valid HTML canvas element on web.
 type SurfaceDescriptor struct {
+	// Canvas must be specified.
+	Canvas js.Value
+
 	Label string
 }
 
 func (g Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
-	jsContext := js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "webgpu")
+	if descriptor.Canvas.IsUndefined() {
+		panic("wgpu.Instance.CreateSurface: descriptor.Canvas must be specified")
+	}
+	jsContext := descriptor.Canvas.Call("getContext", "webgpu")
 	return &Surface{jsContext}
 }
 
