@@ -35,7 +35,3 @@ func (g Surface) GetCurrentTexture() (*Texture, error) {
 func (g Surface) Present() {} // no-op
 
 func (g Surface) Release() {} // no-op
-
-func (g Surface) CanvasContext() js.Value {
-	return g.jsValue
-}
