@@ -757,14 +757,6 @@ type StencilFaceState struct {
 	PassOp      StencilOperation
 }
 
-type OptionalBool uint32
-
-const (
-	False     OptionalBool = C.WGPUOptionalBool_False
-	True      OptionalBool = C.WGPUOptionalBool_True
-	Undefined OptionalBool = C.WGPUOptionalBool_Undefined
-)
-
 type DepthStencilState struct {
 	Format              TextureFormat
 	DepthWriteEnabled   OptionalBool
