@@ -246,14 +246,14 @@ type TexelCopyBufferInfo struct {
 }
 
 type AdapterInfo struct {
-	VendorId          uint32
-	VendorName        string
-	Architecture      string
-	DeviceId          uint32
-	Name              string
-	DriverDescription string
-	AdapterType       AdapterType
-	BackendType       BackendType
+	Vendor       string
+	Architecture string
+	Device       string
+	Description  string
+	AdapterType  AdapterType
+	BackendType  BackendType
+	VendorId     uint32
+	DeviceId     uint32
 }
 
 type SamplerDescriptor struct {

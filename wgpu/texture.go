@@ -60,7 +60,8 @@ func (p *Texture) CreateView(descriptor *TextureViewDescriptor) (*TextureView, e
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 	}
 

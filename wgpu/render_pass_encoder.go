@@ -119,7 +119,10 @@ func (p *RenderPassEncoder) InsertDebugMarker(markerLabel string) {
 	markerLabelStr := C.CString(markerLabel)
 	defer C.free(unsafe.Pointer(markerLabelStr))
 
-	C.wgpuRenderPassEncoderInsertDebugMarker(p.ref, markerLabelStr)
+	C.wgpuRenderPassEncoderInsertDebugMarker(p.ref, C.WGPUStringView{
+		data:   markerLabelStr,
+		length: C.WGPU_STRLEN,
+	})
 }
 
 func (p *RenderPassEncoder) PopDebugGroup() {
@@ -130,7 +133,10 @@ func (p *RenderPassEncoder) PushDebugGroup(groupLabel string) {
 	groupLabelStr := C.CString(groupLabel)
 	defer C.free(unsafe.Pointer(groupLabelStr))
 
-	C.wgpuRenderPassEncoderPushDebugGroup(p.ref, groupLabelStr)
+	C.wgpuRenderPassEncoderPushDebugGroup(p.ref, C.WGPUStringView{
+		data:   groupLabelStr,
+		length: C.WGPU_STRLEN,
+	})
 }
 
 func (p *RenderPassEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dynamicOffsets []uint32) {

@@ -95,7 +95,7 @@ func (p *Buffer) MapAsync(mode MapMode, offset uint64, size uint64, callback Buf
 		C.size_t(offset),
 		C.size_t(size),
 		C.WGPUBufferMapCallbackInfo{
-			callback:  C.gowebgpu_buffer_map_callback_c,
+			callback:  C.WGPUBufferMapCallback(C.gowebgpu_buffer_map_callback_c),
 			userdata1: unsafe.Pointer(&callbackHandle),
 		},
 		p.deviceRef,

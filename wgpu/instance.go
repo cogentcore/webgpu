@@ -36,13 +36,17 @@ func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 		if descriptor.DxilPath != "" {
 			dxilPath := C.CString(descriptor.DxilPath)
 			defer C.free(unsafe.Pointer(dxilPath))
-			instanceExtras.dxilPath = dxilPath
+
+			instanceExtras.dxilPath.data = dxilPath
+			instanceExtras.dxilPath.length = C.WGPU_STRLEN
 		}
 
 		if descriptor.DxcPath != "" {
 			dxcPath := C.CString(descriptor.DxcPath)
 			defer C.free(unsafe.Pointer(dxcPath))
-			instanceExtras.dxcPath = dxcPath
+
+			instanceExtras.dxcPath.data = dxcPath
+			instanceExtras.dxcPath.length = C.WGPU_STRLEN
 		}
 
 		desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(instanceExtras))
@@ -103,7 +107,8 @@ func (p *Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		if descriptor.WindowsHWND != nil {
@@ -220,7 +225,7 @@ func (p *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, err
 	}
 	handle := cgo.NewHandle(cb)
 	C.wgpuInstanceRequestAdapter(p.ref, opts, C.WGPURequestAdapterCallbackInfo{
-		callback:  C.gowebgpu_request_adapter_callback_c,
+		callback:  C.WGPURequestAdapterCallback(C.gowebgpu_request_adapter_callback_c),
 		userdata1: unsafe.Pointer(&handle),
 	})
 
@@ -257,7 +262,6 @@ type RegistryReport struct {
 	NumAllocated        uint64
 	NumKeptFromUser     uint64
 	NumReleasedFromUser uint64
-	NumError            uint64
 	ElementSize         uint64
 }
 
@@ -272,6 +276,7 @@ type HubReport struct {
 	RenderBundles    RegistryReport
 	RenderPipelines  RegistryReport
 	ComputePipelines RegistryReport
+	PipelineCaches   RegistryReport
 	QuerySets        RegistryReport
 	Buffers          RegistryReport
 	Textures         RegistryReport
@@ -281,11 +286,7 @@ type HubReport struct {
 
 type GlobalReport struct {
 	Surfaces RegistryReport
-	Vulkan   *HubReport
-	Metal    *HubReport
-	Dx12     *HubReport
-	Dx11     *HubReport
-	Gl       *HubReport
+	Hub      *HubReport
 }
 
 func (p *Instance) GenerateReport() GlobalReport {
@@ -297,7 +298,6 @@ func (p *Instance) GenerateReport() GlobalReport {
 			NumAllocated:        uint64(creport.numAllocated),
 			NumKeptFromUser:     uint64(creport.numKeptFromUser),
 			NumReleasedFromUser: uint64(creport.numReleasedFromUser),
-			NumError:            uint64(creport.numError),
 			ElementSize:         uint64(creport.elementSize),
 		}
 	}
@@ -314,6 +314,7 @@ func (p *Instance) GenerateReport() GlobalReport {
 			RenderBundles:    mapRegistryReport(creport.renderBundles),
 			RenderPipelines:  mapRegistryReport(creport.renderPipelines),
 			ComputePipelines: mapRegistryReport(creport.computePipelines),
+			PipelineCaches:   mapRegistryReport(creport.pipelineCaches),
 			QuerySets:        mapRegistryReport(creport.querySets),
 			Buffers:          mapRegistryReport(creport.buffers),
 			Textures:         mapRegistryReport(creport.textures),
@@ -324,20 +325,7 @@ func (p *Instance) GenerateReport() GlobalReport {
 
 	report := GlobalReport{
 		Surfaces: mapRegistryReport(r.surfaces),
-	}
-
-	switch r.backendType {
-	case C.WGPUBackendType_Vulkan:
-		report.Vulkan = mapHubReport(r.vulkan)
-	case C.WGPUBackendType_Metal:
-		report.Metal = mapHubReport(r.metal)
-	case C.WGPUBackendType_D3D12:
-		report.Dx12 = mapHubReport(r.dx12)
-	// TODO: no longer present in C API
-	// case C.WGPUBackendType_D3D11:
-	// 	report.Dx11 = mapHubReport(r.dx11)
-	case C.WGPUBackendType_OpenGL:
-		report.Gl = mapHubReport(r.gl)
+		Hub:      mapHubReport(r.hub),
 	}
 
 	return report

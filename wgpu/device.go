@@ -193,7 +193,7 @@ func gowebgpu_error_callback_go(_type C.WGPUErrorType, message *C.WGPUStringView
 	handle := *(*cgo.Handle)(userdata)
 	cb, ok := handle.Value().(errorCallback)
 	if ok {
-		cb(ErrorType(_type), C.GoStringN(message.data, message.length))
+		cb(ErrorType(_type), C.GoStringN(message.data, C.int(message.length)))
 	}
 }
 
@@ -207,7 +207,8 @@ func (p *Device) CreateBindGroup(descriptor *BindGroupDescriptor) (*BindGroup, e
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		if descriptor.Layout != nil {
@@ -305,7 +306,8 @@ func (p *Device) CreateBindGroupLayout(descriptor *BindGroupLayoutDescriptor) (*
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		entryCount := len(descriptor.Entries)
@@ -378,7 +380,8 @@ func (p *Device) CreateBuffer(descriptor *BufferDescriptor) (*Buffer, error) {
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		desc.usage = C.WGPUBufferUsage(descriptor.Usage)
@@ -415,7 +418,10 @@ func (p *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) (*Co
 		defer C.free(unsafe.Pointer(label))
 
 		desc = &C.WGPUCommandEncoderDescriptor{
-			label: label,
+			label: C.WGPUStringView{
+				data:   label,
+				length: C.WGPU_STRLEN,
+			},
 		}
 	}
 
@@ -459,7 +465,8 @@ func (p *Device) CreateComputePipeline(descriptor *ComputePipelineDescriptor) (*
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		if descriptor.Layout != nil {
@@ -474,7 +481,8 @@ func (p *Device) CreateComputePipeline(descriptor *ComputePipelineDescriptor) (*
 			entryPoint := C.CString(descriptor.Compute.EntryPoint)
 			defer C.free(unsafe.Pointer(entryPoint))
 
-			compute.entryPoint = entryPoint
+			compute.entryPoint.data = entryPoint
+			compute.entryPoint.length = C.WGPU_STRLEN
 		}
 		desc.compute = compute
 	}
@@ -519,7 +527,8 @@ func (p *Device) CreatePipelineLayout(descriptor *PipelineLayoutDescriptor) (*Pi
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		bindGroupLayoutCount := len(descriptor.BindGroupLayouts)
@@ -601,7 +610,9 @@ func (p *Device) CreateQuerySet(descriptor *QuerySetDescriptor) (*QuerySet, erro
 		if descriptor.Label != "" {
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
-			desc.label = label
+
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		desc._type = C.WGPUQueryType(descriptor.Type)
@@ -657,7 +668,9 @@ func (p *Device) CreateRenderBundleEncoder(descriptor *RenderBundleEncoderDescri
 		if descriptor.Label != "" {
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
-			desc.label = label
+
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		colorFormatCount := len(descriptor.ColorFormats)
@@ -744,9 +757,17 @@ type StencilFaceState struct {
 	PassOp      StencilOperation
 }
 
+type OptionalBool uint32
+
+const (
+	False     OptionalBool = C.WGPUOptionalBool_False
+	True      OptionalBool = C.WGPUOptionalBool_True
+	Undefined OptionalBool = C.WGPUOptionalBool_Undefined
+)
+
 type DepthStencilState struct {
 	Format              TextureFormat
-	DepthWriteEnabled   bool
+	DepthWriteEnabled   OptionalBool
 	DepthCompare        CompareFunction
 	StencilFront        StencilFaceState
 	StencilBack         StencilFaceState
@@ -771,7 +792,8 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		if descriptor.Layout != nil {
@@ -792,7 +814,8 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 				entryPoint := C.CString(vertex.EntryPoint)
 				defer C.free(unsafe.Pointer(entryPoint))
 
-				vert.entryPoint = entryPoint
+				vert.entryPoint.data = entryPoint
+				vert.entryPoint.length = C.WGPU_STRLEN
 			}
 
 			bufferCount := len(vertex.Buffers)
@@ -852,7 +875,7 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 
 			ds.nextInChain = nil
 			ds.format = C.WGPUTextureFormat(depthStencil.Format)
-			ds.depthWriteEnabled = cBool(depthStencil.DepthWriteEnabled)
+			ds.depthWriteEnabled = C.WGPUOptionalBool(depthStencil.DepthWriteEnabled)
 			ds.depthCompare = C.WGPUCompareFunction(depthStencil.DepthCompare)
 			ds.stencilFront = C.WGPUStencilFaceState{
 				compare:     C.WGPUCompareFunction(depthStencil.StencilFront.Compare),
@@ -892,7 +915,8 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 				entryPoint := C.CString(fragment.EntryPoint)
 				defer C.free(unsafe.Pointer(entryPoint))
 
-				frag.entryPoint = entryPoint
+				frag.entryPoint.data = entryPoint
+				frag.entryPoint.length = C.WGPU_STRLEN
 			}
 
 			if fragment.Module != nil {
@@ -987,7 +1011,8 @@ func (p *Device) CreateSampler(descriptor *SamplerDescriptor) (*Sampler, error) 
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 	}
 
@@ -1032,7 +1057,8 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		switch {
@@ -1068,7 +1094,7 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 				wgsl.code.data = code
 				wgsl.code.length = C.WGPU_STRLEN
 			} else {
-				wgsl.code = nil
+				wgsl.code.data = nil
 				wgsl.code.length = 0
 			}
 
@@ -1088,7 +1114,7 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 				glsl.code.data = code
 				glsl.code.length = C.WGPU_STRLEN
 			} else {
-				glsl.code = nil
+				glsl.code.data = nil
 				glsl.code.length = 0
 			}
 
@@ -1107,8 +1133,8 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 					defer C.free(unsafe.Pointer(valuePtr))
 
 					shaderDefinesSlice[index] = C.WGPUShaderDefine{
-						name:  namePtr,
-						value: valuePtr,
+						name:  C.WGPUStringView{data: namePtr, length: C.WGPU_STRLEN},
+						value: C.WGPUStringView{data: valuePtr, length: C.WGPU_STRLEN},
 					}
 					index++
 				}
@@ -1169,7 +1195,8 @@ func (p *Device) CreateTexture(descriptor *TextureDescriptor) (*Texture, error) 
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 	}
 
@@ -1195,13 +1222,17 @@ func (p *Device) CreateTexture(descriptor *TextureDescriptor) (*Texture, error) 
 }
 
 func (p *Device) GetFeatures() []FeatureName {
-	size := C.wgpuDeviceGetFeatures(p.ref, nil)
-	if size == 0 {
-		return nil
+	var supportedFeatures C.WGPUSupportedFeatures
+	C.wgpuDeviceGetFeatures(p.ref, (*C.WGPUSupportedFeatures)(unsafe.Pointer(&supportedFeatures)))
+	defer C.free(unsafe.Pointer(supportedFeatures.features))
+
+	features := make([]FeatureName, supportedFeatures.featureCount)
+
+	for i := range int(supportedFeatures.featureCount) {
+		offset := uintptr(i) * unsafe.Sizeof(C.WGPUFeatureName(0))
+		features[i] = FeatureName(*(*C.WGPUFeatureName)(unsafe.Pointer(uintptr(unsafe.Pointer(supportedFeatures.features)) + offset)))
 	}
 
-	features := make([]FeatureName, size)
-	C.wgpuDeviceGetFeatures(p.ref, (*C.WGPUFeatureName)(unsafe.Pointer(&features[0])))
 	return features
 }
 
@@ -1236,7 +1267,6 @@ func (p *Device) GetLimits() Limits {
 		MaxBufferSize:                             uint64(limits.maxBufferSize),
 		MaxVertexAttributes:                       uint32(limits.maxVertexAttributes),
 		MaxVertexBufferArrayStride:                uint32(limits.maxVertexBufferArrayStride),
-		MaxInterStageShaderComponents:             uint32(limits.maxInterStageShaderComponents),
 		MaxInterStageShaderVariables:              uint32(limits.maxInterStageShaderVariables),
 		MaxColorAttachments:                       uint32(limits.maxColorAttachments),
 		MaxComputeWorkgroupStorageSize:            uint32(limits.maxComputeWorkgroupStorageSize),
@@ -1263,5 +1293,5 @@ func (p *Device) HasFeature(feature FeatureName) bool {
 }
 
 func (p *Device) Poll(wait bool, submissionIndex uint64) (queueEmpty bool) {
-	return goBool(C.wgpuDevicePoll(p.ref, cBool(wait), submissionIndex))
+	return goBool(C.wgpuDevicePoll(p.ref, cBool(wait), (*C.WGPUSubmissionIndex)(unsafe.Pointer(&submissionIndex))))
 }

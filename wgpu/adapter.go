@@ -23,13 +23,17 @@ type Adapter struct {
 }
 
 func (p *Adapter) GetFeatures() []FeatureName {
-	size := C.wgpuAdapterGetFeatures(p.ref, nil)
-	if size == 0 {
-		return nil
+	var supportedFeatures C.WGPUSupportedFeatures
+	C.wgpuAdapterGetFeatures(p.ref, (*C.WGPUSupportedFeatures)(unsafe.Pointer(&supportedFeatures)))
+	defer C.free(unsafe.Pointer(supportedFeatures.features))
+
+	features := make([]FeatureName, supportedFeatures.featureCount)
+
+	for i := range int(supportedFeatures.featureCount) {
+		offset := uintptr(i) * unsafe.Sizeof(C.WGPUFeatureName(0))
+		features[i] = FeatureName(*(*C.WGPUFeatureName)(unsafe.Pointer(uintptr(unsafe.Pointer(supportedFeatures.features)) + offset)))
 	}
 
-	features := make([]FeatureName, size)
-	C.wgpuAdapterGetFeatures(p.ref, (*C.WGPUFeatureName)(unsafe.Pointer(&features[0])))
 	return features
 }
 
@@ -64,7 +68,6 @@ func (p *Adapter) GetLimits() Limits {
 		MaxBufferSize:                             uint64(limits.maxBufferSize),
 		MaxVertexAttributes:                       uint32(limits.maxVertexAttributes),
 		MaxVertexBufferArrayStride:                uint32(limits.maxVertexBufferArrayStride),
-		MaxInterStageShaderComponents:             uint32(limits.maxInterStageShaderComponents),
 		MaxInterStageShaderVariables:              uint32(limits.maxInterStageShaderVariables),
 		MaxColorAttachments:                       uint32(limits.maxColorAttachments),
 		MaxColorAttachmentBytesPerSample:          uint32(limits.maxColorAttachmentBytesPerSample),
@@ -86,14 +89,14 @@ func (p *Adapter) GetInfo() AdapterInfo {
 	C.wgpuAdapterGetInfo(p.ref, &info)
 
 	return AdapterInfo{
-		VendorId:          uint32(info.vendorID),
-		VendorName:        C.GoString(info.vendor),
-		Architecture:      C.GoString(info.architecture),
-		DeviceId:          uint32(info.deviceID),
-		Name:              C.GoString(info.device),
-		DriverDescription: C.GoString(info.description),
-		AdapterType:       AdapterType(info.adapterType),
-		BackendType:       BackendType(info.backendType),
+		Vendor:       C.GoStringN(info.vendor.data, C.int(info.vendor.length)),
+		Architecture: C.GoStringN(info.architecture.data, C.int(info.architecture.length)),
+		Device:       C.GoStringN(info.device.data, C.int(info.device.length)),
+		Description:  C.GoStringN(info.description.data, C.int(info.description.length)),
+		AdapterType:  AdapterType(info.adapterType),
+		BackendType:  BackendType(info.backendType),
+		VendorId:     uint32(info.vendorID),
+		DeviceId:     uint32(info.deviceID),
 	}
 }
 
@@ -136,7 +139,8 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		requiredFeatureCount := len(descriptor.RequiredFeatures)
@@ -152,11 +156,9 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 		}
 
 		if descriptor.RequiredLimits != nil {
-			requiredLimits := (*C.WGPULimits)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPULimits{}))))
-			defer C.free(unsafe.Pointer(requiredLimits))
-
 			l := descriptor.RequiredLimits
-			requiredLimits.limits = C.WGPULimits{
+
+			requiredLimits := C.WGPULimits{
 				maxTextureDimension1D:                     C.uint32_t(l.MaxTextureDimension1D),
 				maxTextureDimension2D:                     C.uint32_t(l.MaxTextureDimension2D),
 				maxTextureDimension3D:                     C.uint32_t(l.MaxTextureDimension3D),
@@ -178,7 +180,6 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 				maxBufferSize:                             C.uint64_t(l.MaxBufferSize),
 				maxVertexAttributes:                       C.uint32_t(l.MaxVertexAttributes),
 				maxVertexBufferArrayStride:                C.uint32_t(l.MaxVertexBufferArrayStride),
-				maxInterStageShaderComponents:             C.uint32_t(l.MaxInterStageShaderComponents),
 				maxInterStageShaderVariables:              C.uint32_t(l.MaxInterStageShaderVariables),
 				maxColorAttachments:                       C.uint32_t(l.MaxColorAttachments),
 				maxComputeWorkgroupStorageSize:            C.uint32_t(l.MaxComputeWorkgroupStorageSize),
@@ -188,7 +189,8 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 				maxComputeWorkgroupSizeZ:                  C.uint32_t(l.MaxComputeWorkgroupSizeZ),
 				maxComputeWorkgroupsPerDimension:          C.uint32_t(l.MaxComputeWorkgroupsPerDimension),
 			}
-			desc.requiredLimits = requiredLimits
+
+			desc.requiredLimits = &requiredLimits
 
 			nativeLimits := (*C.WGPUNativeLimits)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUNativeLimits{}))))
 			defer C.free(unsafe.Pointer(nativeLimits))
@@ -198,14 +200,16 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 			nativeLimits.maxPushConstantSize = C.uint32_t(l.MaxPushConstantSize)
 			nativeLimits.maxNonSamplerBindings = C.uint32_t(l.MaxNonSamplerBindings)
 
-			desc.requiredLimits.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(nativeLimits))
+			desc.requiredLimits.nextInChain = (*C.WGPUChainedStructOut)(unsafe.Pointer(nativeLimits))
 		}
 
 		if descriptor.DeviceLostCallback != nil {
 			handle := cgo.NewHandle(descriptor.DeviceLostCallback)
 
-			desc.deviceLostCallback = C.WGPUDeviceLostCallback(C.gowebgpu_device_lost_callback_c)
-			desc.deviceLostUserdata = unsafe.Pointer(&handle)
+			desc.deviceLostCallbackInfo = C.WGPUDeviceLostCallbackInfo{
+				callback:  C.WGPUDeviceLostCallback(C.gowebgpu_device_lost_callback_c),
+				userdata1: unsafe.Pointer(&handle),
+			}
 		}
 
 		if descriptor.TracePath != "" {
@@ -218,7 +222,8 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 			tracePath := C.CString(descriptor.TracePath)
 			defer C.free(unsafe.Pointer(tracePath))
 
-			deviceExtras.tracePath = tracePath
+			deviceExtras.tracePath.data = tracePath
+			deviceExtras.tracePath.length = C.WGPU_STRLEN
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(deviceExtras))
 		}
@@ -233,7 +238,7 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 	}
 	handle := cgo.NewHandle(cb)
 	C.wgpuAdapterRequestDevice(p.ref, desc, C.WGPURequestDeviceCallbackInfo{
-		callback:  C.gowebgpu_request_device_callback_c,
+		callback:  C.WGPURequestDeviceCallback(C.gowebgpu_request_device_callback_c),
 		userdata1: unsafe.Pointer(&handle),
 	})
 

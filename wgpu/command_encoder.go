@@ -177,7 +177,7 @@ func (p *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) *Co
 		defer C.free(unsafe.Pointer(label))
 
 		desc = &C.WGPUComputePassDescriptor{
-			label: label,
+			label: C.WGPUStringView{data: label, length: C.WGPU_STRLEN},
 		}
 	}
 
@@ -198,7 +198,8 @@ func (p *CommandEncoder) BeginRenderPass(descriptor *RenderPassDescriptor) *Rend
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		colorAttachmentCount := len(descriptor.ColorAttachments)
@@ -474,7 +475,7 @@ func (p *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) (*CommandBu
 		defer C.free(unsafe.Pointer(label))
 
 		desc = &C.WGPUCommandBufferDescriptor{
-			label: label,
+			label: C.WGPUStringView{data: label, length: C.WGPU_STRLEN},
 		}
 	}
 
