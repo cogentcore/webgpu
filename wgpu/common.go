@@ -53,11 +53,8 @@ type Limits struct {
 	MaxComputeWorkgroupSizeZ                  uint32
 	MaxComputeWorkgroupsPerDimension          uint32
 
-	MaxPushConstantSize uint32
-}
-
-type SupportedLimits struct {
-	Limits Limits
+	MaxPushConstantSize   uint32
+	MaxNonSamplerBindings uint32
 }
 
 // Color as described:
@@ -131,14 +128,10 @@ type ShaderModuleWGSLDescriptor struct {
 	Code string
 }
 
-type RequiredLimits struct {
-	Limits Limits
-}
-
 type DeviceDescriptor struct {
 	Label              string
 	RequiredFeatures   []FeatureName
-	RequiredLimits     *RequiredLimits
+	RequiredLimits     *Limits
 	DeviceLostCallback DeviceLostCallback
 	TracePath          string
 }
