@@ -26,7 +26,7 @@ void gowebgpu_device_lost_callback_c(WGPUDeviceLostReason reason, char const * m
   gowebgpu_device_lost_callback_go(reason, message, userdata);
 }
 
-void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata) {
+void gowebgpu_error_callback_c(enum WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void * userdata, void * userdata2) {
   if (type == WGPUErrorType_NoError) {
     return;
   }

@@ -188,39 +188,39 @@ func (v BufferBindingType) String() string {
 	}
 }
 
-type BufferMapAsyncStatus uint32
+type MapAsyncStatus uint32
 
 const (
-	BufferMapAsyncStatusSuccess                 BufferMapAsyncStatus = 0x00000000
-	BufferMapAsyncStatusValidationError         BufferMapAsyncStatus = 0x00000001
-	BufferMapAsyncStatusUnknown                 BufferMapAsyncStatus = 0x00000002
-	BufferMapAsyncStatusDeviceLost              BufferMapAsyncStatus = 0x00000003
-	BufferMapAsyncStatusDestroyedBeforeCallback BufferMapAsyncStatus = 0x00000004
-	BufferMapAsyncStatusUnmappedBeforeCallback  BufferMapAsyncStatus = 0x00000005
-	BufferMapAsyncStatusMappingAlreadyPending   BufferMapAsyncStatus = 0x00000006
-	BufferMapAsyncStatusOffsetOutOfRange        BufferMapAsyncStatus = 0x00000007
-	BufferMapAsyncStatusSizeOutOfRange          BufferMapAsyncStatus = 0x00000008
+	MapAsyncStatusSuccess                 MapAsyncStatus = 0x00000000
+	MapAsyncStatusValidationError         MapAsyncStatus = 0x00000001
+	MapAsyncStatusUnknown                 MapAsyncStatus = 0x00000002
+	MapAsyncStatusDeviceLost              MapAsyncStatus = 0x00000003
+	MapAsyncStatusDestroyedBeforeCallback MapAsyncStatus = 0x00000004
+	MapAsyncStatusUnmappedBeforeCallback  MapAsyncStatus = 0x00000005
+	MapAsyncStatusMappingAlreadyPending   MapAsyncStatus = 0x00000006
+	MapAsyncStatusOffsetOutOfRange        MapAsyncStatus = 0x00000007
+	MapAsyncStatusSizeOutOfRange          MapAsyncStatus = 0x00000008
 )
 
-func (v BufferMapAsyncStatus) String() string {
+func (v MapAsyncStatus) String() string {
 	switch v {
-	case BufferMapAsyncStatusSuccess:
+	case MapAsyncStatusSuccess:
 		return "success"
-	case BufferMapAsyncStatusValidationError:
+	case MapAsyncStatusValidationError:
 		return "validation-error"
-	case BufferMapAsyncStatusUnknown:
+	case MapAsyncStatusUnknown:
 		return "unknown"
-	case BufferMapAsyncStatusDeviceLost:
+	case MapAsyncStatusDeviceLost:
 		return "device-lost"
-	case BufferMapAsyncStatusDestroyedBeforeCallback:
+	case MapAsyncStatusDestroyedBeforeCallback:
 		return "destroyed-before-callback"
-	case BufferMapAsyncStatusUnmappedBeforeCallback:
+	case MapAsyncStatusUnmappedBeforeCallback:
 		return "unmapped-before-callback"
-	case BufferMapAsyncStatusMappingAlreadyPending:
+	case MapAsyncStatusMappingAlreadyPending:
 		return "mapping-already-pending"
-	case BufferMapAsyncStatusOffsetOutOfRange:
+	case MapAsyncStatusOffsetOutOfRange:
 		return "offset-out-of-range"
-	case BufferMapAsyncStatusSizeOutOfRange:
+	case MapAsyncStatusSizeOutOfRange:
 		return "size-out-of-range"
 	default:
 		return ""
