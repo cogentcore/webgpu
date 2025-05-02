@@ -7,12 +7,18 @@ package wgpu
 #include <stdlib.h>
 #include "./lib/wgpu.h"
 
-extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
+extern void gowebgpu_error_callback_c(enum WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void * userdata, void * userdata2);
 
 static inline void gowebgpu_compute_pass_encoder_end(WGPUComputePassEncoder computePassEncoder, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuComputePassEncoderEnd(computePassEncoder);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
 static inline void gowebgpu_compute_pass_encoder_release(WGPUComputePassEncoder computePassEncoder, WGPUDevice device) {
