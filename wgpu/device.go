@@ -1011,21 +1011,17 @@ func (p *Device) CreateSampler(descriptor *SamplerDescriptor) (*Sampler, error) 
 	return &Sampler{ref}, nil
 }
 
-type ShaderModuleSPIRVDescriptor struct {
-	Code []byte
-}
-
-type ShaderModuleGLSLDescriptor struct {
+type ShaderSourceGLSL struct {
 	Code        string
 	Defines     map[string]string
 	ShaderStage ShaderStage
 }
 
 type ShaderModuleDescriptor struct {
-	Label           string
-	SPIRVDescriptor *ShaderModuleSPIRVDescriptor
-	WGSLDescriptor  *ShaderModuleWGSLDescriptor
-	GLSLDescriptor  *ShaderModuleGLSLDescriptor
+	Label       string
+	SPIRVSource *ShaderSourceSPIRV
+	WGSLSource  *ShaderSourceWGSL
+	GLSLSource  *ShaderSourceGLSL
 }
 
 func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*ShaderModule, error) {
@@ -1040,13 +1036,13 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 		}
 
 		switch {
-		case descriptor.SPIRVDescriptor != nil:
-			spirv := (*C.WGPUShaderModuleSPIRVDescriptor)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderModuleSPIRVDescriptor{}))))
+		case descriptor.SPIRVSource != nil:
+			spirv := (*C.WGPUShaderSourceSPIRV)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderSourceSPIRV{}))))
 			defer C.free(unsafe.Pointer(spirv))
 
-			codeSize := len(descriptor.SPIRVDescriptor.Code)
+			codeSize := len(descriptor.SPIRVSource.Code)
 			if codeSize > 0 {
-				code := C.CBytes(descriptor.SPIRVDescriptor.Code)
+				code := C.CBytes(descriptor.SPIRVSource.Code)
 				defer C.free(code)
 
 				spirv.codeSize = C.uint32_t(codeSize)
@@ -1057,42 +1053,46 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 			}
 
 			spirv.chain.next = nil
-			spirv.chain.sType = C.WGPUSType_ShaderModuleSPIRVDescriptor
+			spirv.chain.sType = C.WGPUSType_ShaderSourceSPIRV
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(spirv))
 
-		case descriptor.WGSLDescriptor != nil:
-			wgsl := (*C.WGPUShaderModuleWGSLDescriptor)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderModuleWGSLDescriptor{}))))
+		case descriptor.WGSLSource != nil:
+			wgsl := (*C.WGPUShaderSourceWGSL)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderSourceWGSL{}))))
 			defer C.free(unsafe.Pointer(wgsl))
 
-			if descriptor.WGSLDescriptor.Code != "" {
-				code := C.CString(descriptor.WGSLDescriptor.Code)
+			if descriptor.WGSLSource.Code != "" {
+				code := C.CString(descriptor.WGSLSource.Code)
 				defer C.free(unsafe.Pointer(code))
 
-				wgsl.code = code
+				wgsl.code.data = code
+				wgsl.code.length = C.WGPU_STRLEN
 			} else {
 				wgsl.code = nil
+				wgsl.code.length = 0
 			}
 
 			wgsl.chain.next = nil
-			wgsl.chain.sType = C.WGPUSType_ShaderModuleWGSLDescriptor
+			wgsl.chain.sType = C.WGPUSType_ShaderSourceWGSL
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(wgsl))
 
-		case descriptor.GLSLDescriptor != nil:
-			glsl := (*C.WGPUShaderModuleGLSLDescriptor)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderModuleGLSLDescriptor{}))))
+		case descriptor.GLSLSource != nil:
+			glsl := (*C.WGPUShaderSourceGLSL)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderSourceGLSL{}))))
 			defer C.free(unsafe.Pointer(glsl))
 
-			if descriptor.GLSLDescriptor.Code != "" {
-				code := C.CString(descriptor.GLSLDescriptor.Code)
+			if descriptor.GLSLSource.Code != "" {
+				code := C.CString(descriptor.GLSLSource.Code)
 				defer C.free(unsafe.Pointer(code))
 
-				glsl.code = code
+				glsl.code.data = code
+				glsl.code.length = C.WGPU_STRLEN
 			} else {
 				glsl.code = nil
+				glsl.code.length = 0
 			}
 
-			defineCount := len(descriptor.GLSLDescriptor.Defines)
+			defineCount := len(descriptor.GLSLSource.Defines)
 			if defineCount > 0 {
 				shaderDefines := C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderDefine{})) * C.size_t(defineCount))
 				defer C.free(shaderDefines)
@@ -1100,7 +1100,7 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 				shaderDefinesSlice := unsafe.Slice((*C.WGPUShaderDefine)(shaderDefines), defineCount)
 				index := 0
 
-				for name, value := range descriptor.GLSLDescriptor.Defines {
+				for name, value := range descriptor.GLSLSource.Defines {
 					namePtr := C.CString(name)
 					defer C.free(unsafe.Pointer(namePtr))
 					valuePtr := C.CString(value)
@@ -1120,9 +1120,9 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 				glsl.defines = nil
 			}
 
-			glsl.stage = C.WGPUShaderStage(descriptor.GLSLDescriptor.ShaderStage)
+			glsl.stage = C.WGPUShaderStage(descriptor.GLSLSource.ShaderStage)
 			glsl.chain.next = nil
-			glsl.chain.sType = C.WGPUSType_ShaderModuleGLSLDescriptor
+			glsl.chain.sType = C.WGPUSType_ShaderSourceGLSL
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(glsl))
 		}

@@ -124,8 +124,12 @@ type SurfaceCapabilities struct {
 	AlphaModes   []CompositeAlphaMode
 }
 
-type ShaderModuleWGSLDescriptor struct {
+type ShaderSourceWGSL struct {
 	Code string
+}
+
+type ShaderSourceSPIRV struct {
+	Code []byte
 }
 
 type DeviceDescriptor struct {
