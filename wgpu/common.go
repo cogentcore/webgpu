@@ -79,7 +79,7 @@ type SurfaceConfiguration struct {
 	ViewFormats []TextureFormat
 }
 
-type ImageCopyTexture struct {
+type TexelCopyTextureInfo struct {
 	Texture  *Texture
 	MipLevel uint32
 	Origin   Origin3D
@@ -165,7 +165,7 @@ type BufferInitDescriptor struct {
 	Usage    BufferUsage
 }
 
-type BufferMapCallback func(BufferMapAsyncStatus)
+type BufferMapCallback func(MapAsyncStatus)
 
 type QueueWorkDoneCallback func(QueueWorkDoneStatus)
 
@@ -234,14 +234,9 @@ type CommandBufferDescriptor struct {
 	Label string
 }
 
-type WrappedSubmissionIndex struct {
-	Queue           *Queue
-	SubmissionIndex SubmissionIndex
-}
-
 type SubmissionIndex uint64
 
-type ImageCopyBuffer struct {
+type TexelCopyBufferInfo struct {
 	Layout TextureDataLayout
 	Buffer *Buffer
 }
