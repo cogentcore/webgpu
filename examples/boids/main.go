@@ -110,7 +110,7 @@ func InitState(window *glfw.Window) (s *State, err error) {
 
 	computeShader, err := s.device.CreateShaderModule(&wgpu.ShaderModuleDescriptor{
 		Label: "compute.wgsl",
-		WGSLDescriptor: &wgpu.ShaderModuleWGSLDescriptor{
+		WGSLSource: &wgpu.ShaderSourceWGSL{
 			Code: compute,
 		},
 	})
@@ -121,7 +121,7 @@ func InitState(window *glfw.Window) (s *State, err error) {
 
 	drawShader, err := s.device.CreateShaderModule(&wgpu.ShaderModuleDescriptor{
 		Label: "draw.wgsl",
-		WGSLDescriptor: &wgpu.ShaderModuleWGSLDescriptor{
+		WGSLSource: &wgpu.ShaderSourceWGSL{
 			Code: draw,
 		},
 	})
