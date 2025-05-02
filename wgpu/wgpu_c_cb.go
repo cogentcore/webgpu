@@ -16,9 +16,9 @@ void gowebgpu_request_adapter_callback_c(WGPURequestAdapterStatus status, WGPUAd
   gowebgpu_request_adapter_callback_go(status, adapter, message, userdata1);
 }
 
-void gowebgpu_request_device_callback_c(WGPURequestDeviceStatus status, WGPUDevice device, char const *message, void *userdata) {
-  extern void gowebgpu_request_device_callback_go(WGPURequestDeviceStatus status, WGPUDevice device, char const *message, void *userdata);
-  gowebgpu_request_device_callback_go(status, device, message, userdata);
+void gowebgpu_request_device_callback_c(WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message, void *userdata1, void *userdata2) {
+  extern void gowebgpu_request_device_callback_go(WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message, void *userdata);
+  gowebgpu_request_device_callback_go(status, device, message, userdata1);
 }
 
 void gowebgpu_device_lost_callback_c(WGPUDeviceLostReason reason, char const * message, void * userdata) {

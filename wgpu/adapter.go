@@ -108,13 +108,13 @@ func (p *Adapter) HasFeature(feature FeatureName) bool {
 type requestDeviceCb func(status RequestDeviceStatus, device *Device, message string)
 
 //export gowebgpu_request_device_callback_go
-func gowebgpu_request_device_callback_go(status C.WGPURequestDeviceStatus, device C.WGPUDevice, message *C.char, userdata unsafe.Pointer) {
+func gowebgpu_request_device_callback_go(status C.WGPURequestDeviceStatus, device C.WGPUDevice, message C.WGPUStringView, userdata unsafe.Pointer) {
 	handle := *(*cgo.Handle)(userdata)
 	defer handle.Delete()
 
 	cb, ok := handle.Value().(requestDeviceCb)
 	if ok {
-		cb(RequestDeviceStatus(status), &Device{ref: device}, C.GoString(message))
+		cb(RequestDeviceStatus(status), &Device{ref: device}, C.GoStringN(message.data, C.int(message.length)))
 	}
 }
 
