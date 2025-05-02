@@ -189,11 +189,11 @@ type Device struct {
 type errorCallback func(typ ErrorType, message string)
 
 //export gowebgpu_error_callback_go
-func gowebgpu_error_callback_go(_type C.WGPUErrorType, message *C.char, userdata unsafe.Pointer) {
+func gowebgpu_error_callback_go(_type C.WGPUErrorType, message *C.WGPUStringView, userdata unsafe.Pointer) {
 	handle := *(*cgo.Handle)(userdata)
 	cb, ok := handle.Value().(errorCallback)
 	if ok {
-		cb(ErrorType(_type), C.GoString(message))
+		cb(ErrorType(_type), C.GoStringN(message.data, message.length))
 	}
 }
 

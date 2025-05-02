@@ -6,8 +6,8 @@ package wgpu
 
 #include "./lib/wgpu.h"
 
-void gowebgpu_buffer_map_callback_c(WGPUBufferMapAsyncStatus status, void *userdata) {
-  extern void gowebgpu_buffer_map_callback_go(WGPUBufferMapAsyncStatus status, void *userdata);
+void gowebgpu_buffer_map_callback_c(WGPUMapAsyncStatus status, void *userdata) {
+  extern void gowebgpu_buffer_map_callback_go(WGPUMapAsyncStatus status, void *userdata);
   gowebgpu_buffer_map_callback_go(status, userdata);
 }
 
@@ -31,7 +31,7 @@ void gowebgpu_error_callback_c(enum WGPUPopErrorScopeStatus status, WGPUErrorTyp
     return;
   }
 
-  extern void gowebgpu_error_callback_go(WGPUErrorType type, char const * message, void * userdata);
+  extern void gowebgpu_error_callback_go(WGPUErrorType type, WGPUStringView message, void * userdata);
   gowebgpu_error_callback_go(type, message, userdata);
 }
 
