@@ -192,13 +192,13 @@ func (p *Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
 type requestAdapterCb func(status RequestAdapterStatus, adapter *Adapter, message string)
 
 //export gowebgpu_request_adapter_callback_go
-func gowebgpu_request_adapter_callback_go(status C.WGPURequestAdapterStatus, adapter C.WGPUAdapter, message *C.char, userdata unsafe.Pointer) {
+func gowebgpu_request_adapter_callback_go(status C.WGPURequestAdapterStatus, adapter C.WGPUAdapter, message C.WGPUStringView, userdata unsafe.Pointer) {
 	handle := *(*cgo.Handle)(userdata)
 	defer handle.Delete()
 
 	cb, ok := handle.Value().(requestAdapterCb)
 	if ok {
-		cb(RequestAdapterStatus(status), &Adapter{ref: adapter}, C.GoString(message))
+		cb(RequestAdapterStatus(status), &Adapter{ref: adapter}, C.GoStringN(message.data, C.int(message.length)))
 	}
 }
 
