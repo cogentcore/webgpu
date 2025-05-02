@@ -7,19 +7,31 @@ package wgpu
 #include <stdlib.h>
 #include "./lib/wgpu.h"
 
-extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
+extern void gowebgpu_error_callback_c(enum WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void * userdata, void * userdata2);
 extern void gowebgpu_queue_work_done_callback_c(WGPUQueueWorkDoneStatus status, void * userdata);
 
 static inline void gowebgpu_queue_write_buffer(WGPUQueue queue, WGPUBuffer buffer, uint64_t bufferOffset, void const * data, size_t size, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuQueueWriteBuffer(queue, buffer, bufferOffset, data, size);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
-static inline void gowebgpu_queue_write_texture(WGPUQueue queue, WGPUImageCopyTexture const * destination, void const * data, size_t dataSize, WGPUTextureDataLayout const * dataLayout, WGPUExtent3D const * writeSize, WGPUDevice device, void * error_userdata) {
+static inline void gowebgpu_queue_write_texture(WGPUQueue queue, WGPUTexelCopyTextureInfo const * destination, void const * data, size_t dataSize, WGPUTexelCopyBufferLayout const * dataLayout, WGPUExtent3D const * writeSize, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuQueueWriteTexture(queue, destination, data, dataSize, dataLayout, writeSize);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
 static inline void gowebgpu_queue_release(WGPUQueue queue, WGPUDevice device) {
@@ -54,7 +66,10 @@ func gowebgpu_queue_work_done_callback_go(status C.WGPUQueueWorkDoneStatus, user
 func (p *Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
 	handle := cgo.NewHandle(callback)
 
-	C.wgpuQueueOnSubmittedWorkDone(p.ref, C.WGPUQueueOnSubmittedWorkDoneCallback(C.gowebgpu_queue_work_done_callback_c), unsafe.Pointer(&handle))
+	C.wgpuQueueOnSubmittedWorkDone(p.ref, C.WGPUQueueWorkDoneCallbackInfo{
+		callback:  C.gowebgpu_queue_work_done_callback_c,
+		userdata1: unsafe.Pointer(&handle),
+	})
 }
 
 func (p *Queue) Submit(commands ...*CommandBuffer) (submissionIndex SubmissionIndex) {
@@ -113,10 +128,10 @@ func (p *Queue) WriteBuffer(buffer *Buffer, bufferOffset uint64, data []byte) (e
 	return
 }
 
-func (p *Queue) WriteTexture(destination *ImageCopyTexture, data []byte, dataLayout *TextureDataLayout, writeSize *Extent3D) (err error) {
-	var dst C.WGPUImageCopyTexture
+func (p *Queue) WriteTexture(destination *TexelCopyTextureInfo, data []byte, dataLayout *TexelCopyBufferLayout, writeSize *Extent3D) (err error) {
+	var dst C.WGPUTexelCopyTextureInfo
 	if destination != nil {
-		dst = C.WGPUImageCopyTexture{
+		dst = C.WGPUTexelCopyTextureInfo{
 			mipLevel: C.uint32_t(destination.MipLevel),
 			origin: C.WGPUOrigin3D{
 				x: C.uint32_t(destination.Origin.X),
@@ -130,9 +145,9 @@ func (p *Queue) WriteTexture(destination *ImageCopyTexture, data []byte, dataLay
 		}
 	}
 
-	var layout C.WGPUTextureDataLayout
+	var layout C.WGPUTexelCopyBufferLayout
 	if dataLayout != nil {
-		layout = C.WGPUTextureDataLayout{
+		layout = C.WGPUTexelCopyBufferLayout{
 			offset:       C.uint64_t(dataLayout.Offset),
 			bytesPerRow:  C.uint32_t(dataLayout.BytesPerRow),
 			rowsPerImage: C.uint32_t(dataLayout.RowsPerImage),

@@ -86,7 +86,7 @@ type TexelCopyTextureInfo struct {
 	Aspect   TextureAspect
 }
 
-type TextureDataLayout struct {
+type TexelCopyBufferLayout struct {
 	Offset       uint64
 	BytesPerRow  uint32
 	RowsPerImage uint32
@@ -241,7 +241,7 @@ type CommandBufferDescriptor struct {
 type SubmissionIndex uint64
 
 type TexelCopyBufferInfo struct {
-	Layout TextureDataLayout
+	Layout TexelCopyBufferLayout
 	Buffer *Buffer
 }
 
