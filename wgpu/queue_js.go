@@ -42,7 +42,7 @@ func (g Queue) WriteTexture(destination *ImageCopyTexture, data []byte, dataLayo
 // OnSubmittedWorkDone as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpuqueue-onsubmittedworkdone
 func (g Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
-	await(g.jsValue.Call("onSubmittedWorkDone")) // TODO(kai): is this correct?
+	AwaitJS(g.jsValue.Call("onSubmittedWorkDone")) // TODO(kai): is this correct?
 	callback(QueueWorkDoneStatusSuccess)
 }
 

@@ -31,18 +31,35 @@ func mapSlice[S, T any](slice []S, fn func(S) T) []T {
 	return result
 }
 
-// await is a helper function roughly equivalent to await in JS.
-func await(promise js.Value) js.Value {
-	result := make(chan js.Value)
-	promise.Call("then", js.FuncOf(func(this js.Value, args []js.Value) any {
-		result <- args[0]
+// AwaitJS is a helper function equivalent to await in JS.
+// It is copied from https://go-review.googlesource.com/c/go/+/150917/
+func AwaitJS(promise js.Value) (result js.Value, ok bool) {
+	if promise.Type() != js.TypeObject || promise.Get("then").Type() != js.TypeFunction {
+		return promise, true
+	}
+
+	done := make(chan struct{})
+
+	onResolve := js.FuncOf(func(this js.Value, args []js.Value) any {
+		result = args[0]
+		ok = true
+		close(done)
 		return nil
-	}), js.FuncOf(func(this js.Value, args []js.Value) any {
-		slog.Error("wgpu.await: promise rejected", "reason", args[0])
-		result <- js.Null()
+	})
+	defer onResolve.Release()
+
+	onReject := js.FuncOf(func(this js.Value, args []js.Value) any {
+		result = args[0]
+		ok = false
+		slog.Error("wgpu.AwaitJS: promise rejected", "reason", result)
+		close(done)
 		return nil
-	}))
-	return <-result
+	})
+	defer onReject.Release()
+
+	promise.Call("then", onResolve, onReject)
+	<-done
+	return
 }
 
 // no-ops
