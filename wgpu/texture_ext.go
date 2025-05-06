@@ -1,7 +1,7 @@
 package wgpu
 
-func (p *Texture) AsImageCopy() *ImageCopyTexture {
-	return &ImageCopyTexture{
+func (p *Texture) AsImageCopy() *TexelCopyTextureInfo {
+	return &TexelCopyTextureInfo{
 		Texture:  p,
 		MipLevel: 0,
 		Origin:   Origin3D{},

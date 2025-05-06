@@ -60,7 +60,7 @@ func main() {
 
 	shaderModule, err := device.CreateShaderModule(&wgpu.ShaderModuleDescriptor{
 		Label: "shader.wgsl",
-		WGSLDescriptor: &wgpu.ShaderModuleWGSLDescriptor{
+		WGSLSource: &wgpu.ShaderSourceWGSL{
 			Code: shader,
 		},
 	})
@@ -141,8 +141,8 @@ func main() {
 	}
 	queue.Submit(cmdBuffer)
 
-	var status wgpu.BufferMapAsyncStatus
-	err = stagingBuffer.MapAsync(wgpu.MapModeRead, 0, size, func(s wgpu.BufferMapAsyncStatus) {
+	var status wgpu.MapAsyncStatus
+	err = stagingBuffer.MapAsync(wgpu.MapModeRead, 0, size, func(s wgpu.MapAsyncStatus) {
 		status = s
 	})
 	if err != nil {
@@ -150,9 +150,9 @@ func main() {
 	}
 	defer stagingBuffer.Unmap()
 
-	device.Poll(true, nil)
+	device.Poll(true, 0)
 
-	if status != wgpu.BufferMapAsyncStatusSuccess {
+	if status != wgpu.MapAsyncStatusSuccess {
 		panic(status)
 	}
 
