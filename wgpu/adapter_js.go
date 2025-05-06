@@ -5,6 +5,8 @@ package wgpu
 import (
 	"fmt"
 	"syscall/js"
+
+	"github.com/cogentcore/webgpu/jsx"
 )
 
 // Adapter as described:
@@ -14,7 +16,7 @@ type Adapter struct {
 }
 
 func (g Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
-	device, ok := AwaitJS(g.jsValue.Call("requestDevice", pointerToJS(descriptor)))
+	device, ok := jsx.Await(g.jsValue.Call("requestDevice", pointerToJS(descriptor)))
 	if !ok || !device.Truthy() {
 		return nil, fmt.Errorf("no WebGPU device avaliable")
 	}
