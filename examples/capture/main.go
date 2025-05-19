@@ -132,9 +132,9 @@ func main() {
 	// Copy the data from the texture to the buffer
 	encoder.CopyTextureToBuffer(
 		texture.AsImageCopy(),
-		&wgpu.ImageCopyBuffer{
+		&wgpu.TexelCopyBufferInfo{
 			Buffer: outputBuffer,
-			Layout: wgpu.TextureDataLayout{
+			Layout: wgpu.TexelCopyBufferLayout{
 				Offset:       0,
 				BytesPerRow:  uint32(bufferDimensions.paddedBytesPerRow),
 				RowsPerImage: wgpu.CopyStrideUndefined,
@@ -151,14 +151,14 @@ func main() {
 
 	queue.Submit(cmdBuffer)
 
-	outputBuffer.MapAsync(wgpu.MapModeRead, 0, bufferSize, func(status wgpu.BufferMapAsyncStatus) {
-		if status != wgpu.BufferMapAsyncStatusSuccess {
+	outputBuffer.MapAsync(wgpu.MapModeRead, 0, bufferSize, func(status wgpu.MapAsyncStatus) {
+		if status != wgpu.MapAsyncStatusSuccess {
 			panic("failed to map buffer")
 		}
 	})
 	defer outputBuffer.Unmap()
 
-	device.Poll(true, nil)
+	device.Poll(true, 0)
 
 	data := outputBuffer.GetMappedRange(0, uint(bufferSize))
 

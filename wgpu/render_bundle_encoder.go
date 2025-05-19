@@ -64,7 +64,7 @@ func (p *RenderBundleEncoder) Finish(descriptor *RenderBundleDescriptor) *Render
 		defer C.free(unsafe.Pointer(label))
 
 		desc = &C.WGPURenderBundleDescriptor{
-			label: label,
+			label: C.WGPUStringView{data: label, length: C.WGPU_STRLEN},
 		}
 	}
 
@@ -79,7 +79,10 @@ func (p *RenderBundleEncoder) InsertDebugMarker(markerLabel string) {
 	markerLabelStr := C.CString(markerLabel)
 	defer C.free(unsafe.Pointer(markerLabelStr))
 
-	C.wgpuRenderBundleEncoderInsertDebugMarker(p.ref, markerLabelStr)
+	C.wgpuRenderBundleEncoderInsertDebugMarker(p.ref, C.WGPUStringView{
+		data:   markerLabelStr,
+		length: C.WGPU_STRLEN,
+	})
 }
 
 func (p *RenderBundleEncoder) PopDebugGroup() {
@@ -90,7 +93,10 @@ func (p *RenderBundleEncoder) PushDebugGroup(groupLabel string) {
 	groupLabelStr := C.CString(groupLabel)
 	defer C.free(unsafe.Pointer(groupLabelStr))
 
-	C.wgpuRenderBundleEncoderPushDebugGroup(p.ref, groupLabelStr)
+	C.wgpuRenderBundleEncoderPushDebugGroup(p.ref, C.WGPUStringView{
+		data:   groupLabelStr,
+		length: C.WGPU_STRLEN,
+	})
 }
 
 func (p *RenderBundleEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dynamicOffsets []uint32) {
