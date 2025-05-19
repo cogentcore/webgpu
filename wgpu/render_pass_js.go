@@ -81,8 +81,9 @@ func (g RenderPassEncoder) DrawIndexed(indexCount uint32, instanceCount uint32, 
 
 // End as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpurenderpassencoder-end
-func (g RenderPassEncoder) End() {
+func (g RenderPassEncoder) End() error {
 	g.jsValue.Call("end")
+	return nil
 }
 
 func (g RenderPassEncoder) Release() {} // no-op
