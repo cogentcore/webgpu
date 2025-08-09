@@ -25,6 +25,7 @@ package wgpu
 // Darwin
 #cgo darwin,!ios,amd64 LDFLAGS: -L${SRCDIR}/lib/darwin/amd64 -lwgpu_native
 #cgo darwin,!ios,arm64 LDFLAGS: -L${SRCDIR}/lib/darwin/arm64 -lwgpu_native
+#cgo darwin,!ios,arm64 CFLAGS: -I${SRCDIR}/lib/darwin/arm64
 
 #cgo darwin LDFLAGS: -framework QuartzCore -framework Metal
 
@@ -35,7 +36,7 @@ package wgpu
 #cgo windows LDFLAGS: -lopengl32 -lgdi32 -ld3dcompiler_47 -lws2_32 -luserenv -lbcrypt -lntdll
 
 #include <stdio.h>
-#include "./lib/wgpu.h"
+#include <wgpu.h>
 
 #ifdef __ANDROID__
 #include <android/log.h>

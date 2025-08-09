@@ -5,7 +5,7 @@ package wgpu
 /*
 
 #include <stdlib.h>
-#include "./lib/wgpu.h"
+#include <wgpu.h>
 
 extern void gowebgpu_error_callback_c(enum WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void * userdata, void * userdata2);
 
@@ -71,7 +71,7 @@ func (p *ComputePassEncoder) InsertDebugMarker(markerLabel string) {
 	defer C.free(unsafe.Pointer(markerLabelStr))
 
 	C.wgpuComputePassEncoderInsertDebugMarker(p.ref, C.WGPUStringView{
-		data: markerLabelStr,
+		data:   markerLabelStr,
 		length: C.WGPU_STRLEN,
 	})
 }
@@ -85,7 +85,7 @@ func (p *ComputePassEncoder) PushDebugGroup(groupLabel string) {
 	defer C.free(unsafe.Pointer(groupLabelStr))
 
 	C.wgpuComputePassEncoderPushDebugGroup(p.ref, C.WGPUStringView{
-		data: groupLabelStr,
+		data:   groupLabelStr,
 		length: C.WGPU_STRLEN,
 	})
 }

@@ -1,0 +1,62 @@
+#!/usr/bin/env goal
+
+// gets the prebuilt release files from wgpu-native and installs
+// to wgpu/lib, moving exiting lib to lib_old.
+// after doing this, use:
+// * lib-old.goal to switch lib-> lib_new, lib_old -> lib
+// * lib-new.goal to go the other way
+// notes:
+// requires gh tool
+
+[mkdir release]
+cd release
+[/bin/rm -rf wgpu-native]
+[/bin/rm -rf zips]
+[mkdir zips]
+git clone https://github.com/gfx-rs/wgpu-native
+cd wgpu-native
+gh release download --dir ../zips -p "*-release.zip"
+cd ../zips
+zips := goalib.SplitLines($ls -1 "*.zip"$)
+cd ../..
+mv wgpu/lib wgpu/lib_old
+[/bin/rm -rf wgpu/lib]
+mkdir wgpu/lib
+cd wgpu/lib
+for _, f := range zips {
+	fmt.Println(f)
+	if strings.Contains(f, "-x86_64-msvc-") || strings.Contains(f, "-aarch64-simulator-") {
+		continue
+	}
+	sp := strings.Split(f, "-")
+	plt := strings.Join(sp[1:3], "-")
+	[mkdir {plt}]
+	cd {plt}
+	unzip {"../../../release/zips/" + f}
+	cd ../
+}
+
+/bin/cp ../lib_old/vendor.go .
+
+type files struct {
+	zip, trg, arch string
+}
+
+fls := []files{{"macos-aarch64", "darwin", "arm64"},{"macos-x86_64", "darwin", "amd64"},{"ios-aarch64", "ios", "arm64"},{"ios-x86_64", "ios", "amd64"},{"windows-aarch64", "windows", "arm64"},{"windows-x86_64", "windows", "amd64"}, {"windows-i686", "windows", "386"}, {"linux-aarch64", "linux", "arm64"},{"linux-x86_64", "linux", "amd64"}, {"android-aarch64", "android", "arm64"}, {"android-x86_64", "android", "amd64"}, {"android-armv7", "android", "arm"},{"android-i686", "android", "386"}}
+
+for _, f := range fls {
+	fmt.Println(f)
+	[mkdir {f.trg}]
+	cd {f.trg}
+	[mkdir {f.arch}]
+	cd {f.arch}
+	[/bin/cp -av {"../../" + f.zip + "/lib/libwgpu_native.a"} .]
+	if f.zip == "windows-aarch64" {
+		/bin/cp -av {"../../" + f.zip + "/lib/wgpu_native.lib"} libwgpu_native.a
+	}
+	/bin/cp -av {"../../" + f.zip + "/include/webgpu/*.h"} .
+	goalib.WriteFile("vendor.go", "package vendor")
+	cd ../../
+	/bin/rm -rf {f.zip}
+}
+

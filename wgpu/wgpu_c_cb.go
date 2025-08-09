@@ -4,7 +4,7 @@ package wgpu
 
 /*
 
-#include "./lib/wgpu.h"
+#include <wgpu.h>
 
 void gowebgpu_buffer_map_callback_c(WGPUMapAsyncStatus status, void *userdata) {
   extern void gowebgpu_buffer_map_callback_go(WGPUMapAsyncStatus status, void *userdata);
