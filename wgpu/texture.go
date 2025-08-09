@@ -7,13 +7,20 @@ package wgpu
 #include <stdlib.h>
 #include "./lib/wgpu.h"
 
-extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
+extern void gowebgpu_error_callback_c(enum WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void * userdata, void * userdata2);
 
 static inline WGPUTextureView gowebgpu_texture_create_view(WGPUTexture texture, WGPUTextureViewDescriptor const * descriptor, WGPUDevice device, void * error_userdata) {
 	WGPUTextureView ref = NULL;
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	ref = wgpuTextureCreateView(texture, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
+
 	return ref;
 }
 
@@ -53,7 +60,8 @@ func (p *Texture) CreateView(descriptor *TextureViewDescriptor) (*TextureView, e
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 	}
 

@@ -53,11 +53,8 @@ type Limits struct {
 	MaxComputeWorkgroupSizeZ                  uint32
 	MaxComputeWorkgroupsPerDimension          uint32
 
-	MaxPushConstantSize uint32
-}
-
-type SupportedLimits struct {
-	Limits Limits
+	MaxPushConstantSize   uint32
+	MaxNonSamplerBindings uint32
 }
 
 // Color as described:
@@ -82,14 +79,14 @@ type SurfaceConfiguration struct {
 	ViewFormats []TextureFormat
 }
 
-type ImageCopyTexture struct {
+type TexelCopyTextureInfo struct {
 	Texture  *Texture
 	MipLevel uint32
 	Origin   Origin3D
 	Aspect   TextureAspect
 }
 
-type TextureDataLayout struct {
+type TexelCopyBufferLayout struct {
 	Offset       uint64
 	BytesPerRow  uint32
 	RowsPerImage uint32
@@ -127,18 +124,18 @@ type SurfaceCapabilities struct {
 	AlphaModes   []CompositeAlphaMode
 }
 
-type ShaderModuleWGSLDescriptor struct {
+type ShaderSourceWGSL struct {
 	Code string
 }
 
-type RequiredLimits struct {
-	Limits Limits
+type ShaderSourceSPIRV struct {
+	Code []byte
 }
 
 type DeviceDescriptor struct {
 	Label              string
 	RequiredFeatures   []FeatureName
-	RequiredLimits     *RequiredLimits
+	RequiredLimits     *Limits
 	DeviceLostCallback DeviceLostCallback
 	TracePath          string
 }
@@ -172,7 +169,7 @@ type BufferInitDescriptor struct {
 	Usage    BufferUsage
 }
 
-type BufferMapCallback func(BufferMapAsyncStatus)
+type BufferMapCallback func(MapAsyncStatus)
 
 type QueueWorkDoneCallback func(QueueWorkDoneStatus)
 
@@ -241,27 +238,22 @@ type CommandBufferDescriptor struct {
 	Label string
 }
 
-type WrappedSubmissionIndex struct {
-	Queue           *Queue
-	SubmissionIndex SubmissionIndex
-}
-
 type SubmissionIndex uint64
 
-type ImageCopyBuffer struct {
-	Layout TextureDataLayout
+type TexelCopyBufferInfo struct {
+	Layout TexelCopyBufferLayout
 	Buffer *Buffer
 }
 
 type AdapterInfo struct {
-	VendorId          uint32
-	VendorName        string
-	Architecture      string
-	DeviceId          uint32
-	Name              string
-	DriverDescription string
-	AdapterType       AdapterType
-	BackendType       BackendType
+	Vendor       string
+	Architecture string
+	Device       string
+	Description  string
+	AdapterType  AdapterType
+	BackendType  BackendType
+	VendorId     uint32
+	DeviceId     uint32
 }
 
 type SamplerDescriptor struct {
