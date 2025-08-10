@@ -158,7 +158,7 @@ func main() {
 	})
 	defer outputBuffer.Unmap()
 
-	device.Poll(true, 0)
+	device.Poll(true, nil)
 
 	data := outputBuffer.GetMappedRange(0, uint(bufferSize))
 
