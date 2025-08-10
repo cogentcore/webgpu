@@ -158,7 +158,10 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 		if descriptor.RequiredLimits != nil {
 			l := descriptor.RequiredLimits
 
-			requiredLimits := C.WGPULimits{
+			requiredLimits := (*C.WGPULimits)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPULimits{}))))
+			defer C.free(unsafe.Pointer(requiredLimits))
+
+			*requiredLimits = C.WGPULimits{
 				maxTextureDimension1D:                     C.uint32_t(l.MaxTextureDimension1D),
 				maxTextureDimension2D:                     C.uint32_t(l.MaxTextureDimension2D),
 				maxTextureDimension3D:                     C.uint32_t(l.MaxTextureDimension3D),
@@ -189,8 +192,7 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 				maxComputeWorkgroupSizeZ:                  C.uint32_t(l.MaxComputeWorkgroupSizeZ),
 				maxComputeWorkgroupsPerDimension:          C.uint32_t(l.MaxComputeWorkgroupsPerDimension),
 			}
-
-			desc.requiredLimits = &requiredLimits
+			desc.requiredLimits = requiredLimits
 
 			nativeLimits := (*C.WGPUNativeLimits)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUNativeLimits{}))))
 			defer C.free(unsafe.Pointer(nativeLimits))
