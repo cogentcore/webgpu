@@ -150,7 +150,7 @@ func main() {
 	}
 	defer stagingBuffer.Unmap()
 
-	device.Poll(true, 0)
+	device.Poll(true, nil)
 
 	if status != wgpu.MapAsyncStatusSuccess {
 		panic(status)
