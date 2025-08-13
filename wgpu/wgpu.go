@@ -6,21 +6,29 @@ package wgpu
 
 // Android
 #cgo android,amd64 LDFLAGS: -L${SRCDIR}/lib/android/amd64 -lwgpu_native
+#cgo android,amd64 CFLAGS: -I${SRCDIR}/lib/android/amd64
 #cgo android,386 LDFLAGS: -L${SRCDIR}/lib/android/386 -lwgpu_native
+#cgo android,386 CFLAGS: -I${SRCDIR}/lib/android/386
 #cgo android,arm64 LDFLAGS: -L${SRCDIR}/lib/android/arm64 -lwgpu_native
+#cgo android,arm64 CFLAGS: -I${SRCDIR}/lib/android/arm64
 #cgo android,arm LDFLAGS: -L${SRCDIR}/lib/android/arm -lwgpu_native
+#cgo android,arm CFLAGS: -I${SRCDIR}/lib/android/arm
 
 #cgo android LDFLAGS: -landroid -lm -llog
 
 // Linux
 #cgo linux,!android,amd64 LDFLAGS: -L${SRCDIR}/lib/linux/amd64 -lwgpu_native
+#cgo linux,!android,amd64 CFLAGS: -I${SRCDIR}/lib/linux/amd64
 #cgo linux,!android,arm64 LDFLAGS: -L${SRCDIR}/lib/linux/arm64 -lwgpu_native
+#cgo linux,!android,arm64 CFLAGS: -I${SRCDIR}/lib/linux/arm64
 
 #cgo linux,!android LDFLAGS: -lm -ldl
 
 // iOS
 #cgo ios,amd64 LDFLAGS: -L${SRCDIR}/lib/ios/amd64 -lwgpu_native
+#cgo ios,amd64 CFLAGS: -I${SRCDIR}/lib/ios/amd64
 #cgo ios,arm64 LDFLAGS: -L${SRCDIR}/lib/ios/arm64 -lwgpu_native
+#cgo ios,arm64 CFLAGS: -I${SRCDIR}/lib/ios/arm64
 
 // Darwin
 #cgo darwin,!ios,amd64 LDFLAGS: -L${SRCDIR}/lib/darwin/amd64 -lwgpu_native
@@ -32,7 +40,11 @@ package wgpu
 
 // Windows
 #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/lib/windows/amd64 -lwgpu_native
+#cgo windows,amd64 CFLAGS: -I${SRCDIR}/lib/windows/amd64
 #cgo windows,arm64 LDFLAGS: -L${SRCDIR}/lib/windows/arm64 -lwgpu_native
+#cgo windows,arm64 CFLAGS: -I${SRCDIR}/lib/windows/arm64
+#cgo windows,386 LDFLAGS: -L${SRCDIR}/lib/windows/386 -lwgpu_native
+#cgo windows,386 CFLAGS: -I${SRCDIR}/lib/windows/386
 
 #cgo windows LDFLAGS: -lopengl32 -lgdi32 -ld3dcompiler_47 -lws2_32 -luserenv -lbcrypt -lntdll
 
