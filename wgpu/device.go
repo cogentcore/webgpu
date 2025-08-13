@@ -178,6 +178,7 @@ static inline WGPUTexture gowebgpu_device_create_texture(WGPUDevice device, WGPU
 import "C"
 import (
 	"errors"
+	"fmt"
 	"runtime/cgo"
 	"unsafe"
 )
@@ -190,6 +191,10 @@ type errorCallback func(typ ErrorType, message string)
 
 //export gowebgpu_error_callback_go
 func gowebgpu_error_callback_go(_type C.WGPUErrorType, message *C.WGPUStringView, userdata unsafe.Pointer) {
+	if userdata == nil {
+		fmt.Println("Warning: nil userdata in error callback:", C.GoStringN(message.data, C.int(message.length)))
+		return
+	}
 	handle := *(*cgo.Handle)(userdata)
 	cb, ok := handle.Value().(errorCallback)
 	if ok {
