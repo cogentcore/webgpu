@@ -8,7 +8,8 @@ package wgpu
 #include <wgpu.h>
 
 extern void gowebgpu_error_callback_c(enum WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void * userdata, void * userdata2);
-extern void gowebgpu_buffer_map_callback_c(WGPUMapAsyncStatus status, void *userdata);
+
+extern void gowebgpu_buffer_map_callback_c(WGPUMapAsyncStatus status, WGPUStringView message, void *userdata, void *userdata2);
 
 static inline void gowebgpu_buffer_map_async(WGPUBuffer buffer, WGPUMapMode mode, size_t offset, size_t size, WGPUBufferMapCallbackInfo callback, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
