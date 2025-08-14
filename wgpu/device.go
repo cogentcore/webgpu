@@ -1285,6 +1285,5 @@ func (p *Device) HasFeature(feature FeatureName) bool {
 }
 
 func (p *Device) Poll(wait bool, submissionIndex *uint64) (queueEmpty bool) {
-	var index *C.WGPUSubmissionIndex
-	return goBool(C.wgpuDevicePoll(p.ref, cBool(wait), index))
+	return goBool(C.wgpuDevicePoll(p.ref, cBool(wait), (*C.WGPUSubmissionIndex)(submissionIndex)))
 }
