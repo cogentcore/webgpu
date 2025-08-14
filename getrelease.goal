@@ -6,7 +6,8 @@
 // * lib-old.goal to switch lib-> lib_new, lib_old -> lib
 // * lib-new.goal to go the other way
 // notes:
-// requires gh tool
+// requires gh tool: https://github.com/cli/cli with authentication configured.
+// and goal: go install cogentcore.org/lab/goal/cmd/goal@main
 
 [mkdir release]
 cd release
