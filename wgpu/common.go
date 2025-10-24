@@ -101,7 +101,6 @@ type Extent3D struct {
 type InstanceDescriptor struct {
 	Backends           InstanceBackend
 	Dx12ShaderCompiler Dx12Compiler
-	DxilPath           string
 	DxcPath            string
 }
 

@@ -33,14 +33,6 @@ func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 		instanceExtras.backends = C.WGPUInstanceBackend(descriptor.Backends)
 		instanceExtras.dx12ShaderCompiler = C.WGPUDx12Compiler(descriptor.Dx12ShaderCompiler)
 
-		if descriptor.DxilPath != "" {
-			dxilPath := C.CString(descriptor.DxilPath)
-			defer C.free(unsafe.Pointer(dxilPath))
-
-			instanceExtras.dxilPath.data = dxilPath
-			instanceExtras.dxilPath.length = C.WGPU_STRLEN
-		}
-
 		if descriptor.DxcPath != "" {
 			dxcPath := C.CString(descriptor.DxcPath)
 			defer C.free(unsafe.Pointer(dxcPath))
