@@ -22,3 +22,7 @@ The included static libraries are built via [GitHub Actions](.github/workflows/b
 [c]: examples/cube
 [t-i]: https://raw.githubusercontent.com/rajveermalviya/go-webgpu/main/tests/triangle/image-msaa.png
 [t]: examples/triangle
+
+## Sponsors
+
+We thank Michael Reinstein and our other [sponsors](https://github.com/sponsors/cogentcore) for their support, which allows us to spend more time improving Cogent Core and Go WebGPU.
