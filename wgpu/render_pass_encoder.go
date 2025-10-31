@@ -5,14 +5,20 @@ package wgpu
 /*
 
 #include <stdlib.h>
-#include "./lib/wgpu.h"
+#include <wgpu.h>
 
-extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
+extern void gowebgpu_error_callback_c(enum WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void * userdata, void * userdata2);
 
 static inline void gowebgpu_render_pass_encoder_end(WGPURenderPassEncoder renderPassEncoder, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuRenderPassEncoderEnd(renderPassEncoder);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
 static inline void gowebgpu_render_pass_encoder_release(WGPURenderPassEncoder renderPassEncoder, WGPUDevice device) {
@@ -113,7 +119,10 @@ func (p *RenderPassEncoder) InsertDebugMarker(markerLabel string) {
 	markerLabelStr := C.CString(markerLabel)
 	defer C.free(unsafe.Pointer(markerLabelStr))
 
-	C.wgpuRenderPassEncoderInsertDebugMarker(p.ref, markerLabelStr)
+	C.wgpuRenderPassEncoderInsertDebugMarker(p.ref, C.WGPUStringView{
+		data:   markerLabelStr,
+		length: C.WGPU_STRLEN,
+	})
 }
 
 func (p *RenderPassEncoder) PopDebugGroup() {
@@ -124,7 +133,10 @@ func (p *RenderPassEncoder) PushDebugGroup(groupLabel string) {
 	groupLabelStr := C.CString(groupLabel)
 	defer C.free(unsafe.Pointer(groupLabelStr))
 
-	C.wgpuRenderPassEncoderPushDebugGroup(p.ref, groupLabelStr)
+	C.wgpuRenderPassEncoderPushDebugGroup(p.ref, C.WGPUStringView{
+		data:   groupLabelStr,
+		length: C.WGPU_STRLEN,
+	})
 }
 
 func (p *RenderPassEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dynamicOffsets []uint32) {
@@ -213,7 +225,7 @@ func (p *RenderPassEncoder) SetPushConstants(stages ShaderStage, offset uint32, 
 	if size == 0 {
 		C.wgpuRenderPassEncoderSetPushConstants(
 			p.ref,
-			C.WGPUShaderStageFlags(stages),
+			C.WGPUShaderStage(stages),
 			C.uint32_t(offset),
 			0,
 			nil,
@@ -223,7 +235,7 @@ func (p *RenderPassEncoder) SetPushConstants(stages ShaderStage, offset uint32, 
 
 	C.wgpuRenderPassEncoderSetPushConstants(
 		p.ref,
-		C.WGPUShaderStageFlags(stages),
+		C.WGPUShaderStage(stages),
 		C.uint32_t(offset),
 		C.uint32_t(size),
 		unsafe.Pointer(&data[0]),

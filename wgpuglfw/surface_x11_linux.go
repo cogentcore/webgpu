@@ -11,7 +11,7 @@ import (
 
 func GetSurfaceDescriptor(w *glfw.Window) *wgpu.SurfaceDescriptor {
 	return &wgpu.SurfaceDescriptor{
-		XlibWindow: &wgpu.SurfaceDescriptorFromXlibWindow{
+		XlibWindow: &wgpu.SurfaceSourceXlibWindow{
 			Display: unsafe.Pointer(glfw.GetX11Display()),
 			Window:  uint32(w.GetX11Window()),
 		},

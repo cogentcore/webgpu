@@ -5,76 +5,143 @@ package wgpu
 /*
 
 #include <stdlib.h>
-#include "./lib/wgpu.h"
+#include <wgpu.h>
 
-extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
+extern void gowebgpu_error_callback_c(enum WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void * userdata, void * userdata2);
 
 static inline void gowebgpu_command_encoder_clear_buffer(WGPUCommandEncoder commandEncoder, WGPUBuffer buffer, uint64_t offset, uint64_t size, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuCommandEncoderClearBuffer(commandEncoder, buffer, offset, size);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
 static inline void gowebgpu_command_encoder_copy_buffer_to_buffer(WGPUCommandEncoder commandEncoder, WGPUBuffer source, uint64_t sourceOffset, WGPUBuffer destination, uint64_t destinationOffset, uint64_t size, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuCommandEncoderCopyBufferToBuffer(commandEncoder, source, sourceOffset, destination, destinationOffset, size);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
-static inline void gowebgpu_command_encoder_copy_buffer_to_texture(WGPUCommandEncoder commandEncoder, WGPUImageCopyBuffer const * source, WGPUImageCopyTexture const * destination, WGPUExtent3D const * copySize, WGPUDevice device, void * error_userdata) {
+static inline void gowebgpu_command_encoder_copy_buffer_to_texture(WGPUCommandEncoder commandEncoder, WGPUTexelCopyBufferInfo const * source, WGPUTexelCopyTextureInfo const * destination, WGPUExtent3D const * copySize, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuCommandEncoderCopyBufferToTexture(commandEncoder, source, destination, copySize);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
-static inline void gowebgpu_command_encoder_copy_texture_to_buffer(WGPUCommandEncoder commandEncoder, WGPUImageCopyTexture const * source, WGPUImageCopyBuffer const * destination, WGPUExtent3D const * copySize, WGPUDevice device, void * error_userdata) {
+static inline void gowebgpu_command_encoder_copy_texture_to_buffer(WGPUCommandEncoder commandEncoder, WGPUTexelCopyTextureInfo const * source, WGPUTexelCopyBufferInfo const * destination, WGPUExtent3D const * copySize, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuCommandEncoderCopyTextureToBuffer(commandEncoder, source, destination, copySize);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
-static inline void gowebgpu_command_encoder_copy_texture_to_texture(WGPUCommandEncoder commandEncoder, WGPUImageCopyTexture const * source, WGPUImageCopyTexture const * destination, WGPUExtent3D const * copySize, WGPUDevice device, void * error_userdata) {
+static inline void gowebgpu_command_encoder_copy_texture_to_texture(WGPUCommandEncoder commandEncoder, WGPUTexelCopyTextureInfo const * source, WGPUTexelCopyTextureInfo const * destination, WGPUExtent3D const * copySize, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuCommandEncoderCopyTextureToTexture(commandEncoder, source, destination, copySize);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
 static inline WGPUCommandBuffer gowebgpu_command_encoder_finish(WGPUCommandEncoder commandEncoder, WGPUCommandBufferDescriptor const * descriptor, WGPUDevice device, void * error_userdata) {
 	WGPUCommandBuffer ref = NULL;
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	ref = wgpuCommandEncoderFinish(commandEncoder, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
+
 	return ref;
 }
 
 static inline void gowebgpu_command_encoder_insert_debug_marker(WGPUCommandEncoder commandEncoder, char const * markerLabel, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	wgpuCommandEncoderInsertDebugMarker(commandEncoder, markerLabel);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+	wgpuCommandEncoderInsertDebugMarker(commandEncoder, (WGPUStringView) {markerLabel, WGPU_STRLEN});
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
 static inline void gowebgpu_command_encoder_pop_debug_group(WGPUCommandEncoder commandEncoder, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuCommandEncoderPopDebugGroup(commandEncoder);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
 static inline void gowebgpu_command_encoder_push_debug_group(WGPUCommandEncoder commandEncoder, char const * groupLabel, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	wgpuCommandEncoderPushDebugGroup(commandEncoder, groupLabel);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+	wgpuCommandEncoderPushDebugGroup(commandEncoder, (WGPUStringView) {groupLabel, WGPU_STRLEN});
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
 static inline void gowebgpu_command_encoder_resolve_query_set(WGPUCommandEncoder commandEncoder, WGPUQuerySet querySet, uint32_t firstQuery, uint32_t queryCount, WGPUBuffer destination, uint64_t destinationOffset, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuCommandEncoderResolveQuerySet(commandEncoder, querySet, firstQuery, queryCount, destination, destinationOffset);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
 static inline void gowebgpu_command_encoder_write_timestamp(WGPUCommandEncoder commandEncoder, WGPUQuerySet querySet, uint32_t queryIndex, WGPUDevice device, void * error_userdata) {
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuCommandEncoderWriteTimestamp(commandEncoder, querySet, queryIndex);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
 }
 
 static inline void gowebgpu_command_encoder_release(WGPUCommandEncoder commandEncoder, WGPUDevice device) {
@@ -110,7 +177,7 @@ func (p *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) *Co
 		defer C.free(unsafe.Pointer(label))
 
 		desc = &C.WGPUComputePassDescriptor{
-			label: label,
+			label: C.WGPUStringView{data: label, length: C.WGPU_STRLEN},
 		}
 	}
 
@@ -119,7 +186,7 @@ func (p *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) *Co
 		panic("Failed to acquire ComputePassEncoder")
 	}
 
-	C.wgpuDeviceReference(p.deviceRef)
+	C.wgpuDeviceAddRef(p.deviceRef)
 	return &ComputePassEncoder{deviceRef: p.deviceRef, ref: ref}
 }
 
@@ -131,7 +198,8 @@ func (p *CommandEncoder) BeginRenderPass(descriptor *RenderPassDescriptor) *Rend
 			label := C.CString(descriptor.Label)
 			defer C.free(unsafe.Pointer(label))
 
-			desc.label = label
+			desc.label.data = label
+			desc.label.length = C.WGPU_STRLEN
 		}
 
 		colorAttachmentCount := len(descriptor.ColorAttachments)
@@ -188,7 +256,7 @@ func (p *CommandEncoder) BeginRenderPass(descriptor *RenderPassDescriptor) *Rend
 	}
 
 	ref := C.wgpuCommandEncoderBeginRenderPass(p.ref, &desc)
-	C.wgpuDeviceReference(p.deviceRef)
+	C.wgpuDeviceAddRef(p.deviceRef)
 	return &RenderPassEncoder{deviceRef: p.deviceRef, ref: ref}
 }
 
@@ -230,22 +298,22 @@ func (p *CommandEncoder) CopyBufferToBuffer(source *Buffer, sourceOffset uint64,
 	return
 }
 
-func (p *CommandEncoder) CopyBufferToTexture(source *ImageCopyBuffer, destination *ImageCopyTexture, copySize *Extent3D) (err error) {
-	var src C.WGPUImageCopyBuffer
+func (p *CommandEncoder) CopyBufferToTexture(source *TexelCopyBufferInfo, destination *TexelCopyTextureInfo, copySize *Extent3D) (err error) {
+	var src C.WGPUTexelCopyBufferInfo
 	if source != nil {
 		if source.Buffer != nil {
 			src.buffer = source.Buffer.ref
 		}
-		src.layout = C.WGPUTextureDataLayout{
+		src.layout = C.WGPUTexelCopyBufferLayout{
 			offset:       C.uint64_t(source.Layout.Offset),
 			bytesPerRow:  C.uint32_t(source.Layout.BytesPerRow),
 			rowsPerImage: C.uint32_t(source.Layout.RowsPerImage),
 		}
 	}
 
-	var dst C.WGPUImageCopyTexture
+	var dst C.WGPUTexelCopyTextureInfo
 	if destination != nil {
-		dst = C.WGPUImageCopyTexture{
+		dst = C.WGPUTexelCopyTextureInfo{
 			mipLevel: C.uint32_t(destination.MipLevel),
 			origin: C.WGPUOrigin3D{
 				x: C.uint32_t(destination.Origin.X),
@@ -285,10 +353,10 @@ func (p *CommandEncoder) CopyBufferToTexture(source *ImageCopyBuffer, destinatio
 	return
 }
 
-func (p *CommandEncoder) CopyTextureToBuffer(source *ImageCopyTexture, destination *ImageCopyBuffer, copySize *Extent3D) (err error) {
-	var src C.WGPUImageCopyTexture
+func (p *CommandEncoder) CopyTextureToBuffer(source *TexelCopyTextureInfo, destination *TexelCopyBufferInfo, copySize *Extent3D) (err error) {
+	var src C.WGPUTexelCopyTextureInfo
 	if source != nil {
-		src = C.WGPUImageCopyTexture{
+		src = C.WGPUTexelCopyTextureInfo{
 			mipLevel: C.uint32_t(source.MipLevel),
 			origin: C.WGPUOrigin3D{
 				x: C.uint32_t(source.Origin.X),
@@ -302,12 +370,12 @@ func (p *CommandEncoder) CopyTextureToBuffer(source *ImageCopyTexture, destinati
 		}
 	}
 
-	var dst C.WGPUImageCopyBuffer
+	var dst C.WGPUTexelCopyBufferInfo
 	if destination != nil {
 		if destination.Buffer != nil {
 			dst.buffer = destination.Buffer.ref
 		}
-		dst.layout = C.WGPUTextureDataLayout{
+		dst.layout = C.WGPUTexelCopyBufferLayout{
 			offset:       C.uint64_t(destination.Layout.Offset),
 			bytesPerRow:  C.uint32_t(destination.Layout.BytesPerRow),
 			rowsPerImage: C.uint32_t(destination.Layout.RowsPerImage),
@@ -340,10 +408,10 @@ func (p *CommandEncoder) CopyTextureToBuffer(source *ImageCopyTexture, destinati
 	return
 }
 
-func (p *CommandEncoder) CopyTextureToTexture(source *ImageCopyTexture, destination *ImageCopyTexture, copySize *Extent3D) (err error) {
-	var src C.WGPUImageCopyTexture
+func (p *CommandEncoder) CopyTextureToTexture(source *TexelCopyTextureInfo, destination *TexelCopyTextureInfo, copySize *Extent3D) (err error) {
+	var src C.WGPUTexelCopyTextureInfo
 	if source != nil {
-		src = C.WGPUImageCopyTexture{
+		src = C.WGPUTexelCopyTextureInfo{
 			mipLevel: C.uint32_t(source.MipLevel),
 			origin: C.WGPUOrigin3D{
 				x: C.uint32_t(source.Origin.X),
@@ -357,9 +425,9 @@ func (p *CommandEncoder) CopyTextureToTexture(source *ImageCopyTexture, destinat
 		}
 	}
 
-	var dst C.WGPUImageCopyTexture
+	var dst C.WGPUTexelCopyTextureInfo
 	if destination != nil {
-		dst = C.WGPUImageCopyTexture{
+		dst = C.WGPUTexelCopyTextureInfo{
 			mipLevel: C.uint32_t(destination.MipLevel),
 			origin: C.WGPUOrigin3D{
 				x: C.uint32_t(destination.Origin.X),
@@ -407,7 +475,7 @@ func (p *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) (*CommandBu
 		defer C.free(unsafe.Pointer(label))
 
 		desc = &C.WGPUCommandBufferDescriptor{
-			label: label,
+			label: C.WGPUStringView{data: label, length: C.WGPU_STRLEN},
 		}
 	}
 

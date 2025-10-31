@@ -1,5 +1,8 @@
 # WebGPU
 
+Current upstream version: v25.0.2.1
+* Use [getrelease.goal](getrelease.goal) for current mechanism to get the released `wgpu-native` libraries downloaded and installed. The libraries will be committed to this repo when v26 comes out, but for now, this is required.
+
 Go bindings for WebGPU, a cross-platform, safe graphics API. It runs natively using [wgpu-native](https://github.com/gfx-rs/wgpu-native) on Vulkan, Metal, D3D12, and OpenGL ES based on https://github.com/rajveermalviya/go-webgpu. It also comes with web (JS) support based on https://github.com/mokiat/wasmgpu.
 
 For more information, see:

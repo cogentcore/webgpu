@@ -13,5 +13,8 @@ import (
 	_ "github.com/cogentcore/webgpu/wgpu/lib/ios/amd64"
 	_ "github.com/cogentcore/webgpu/wgpu/lib/ios/arm64"
 	_ "github.com/cogentcore/webgpu/wgpu/lib/linux/amd64"
+	_ "github.com/cogentcore/webgpu/wgpu/lib/linux/arm64"
+	_ "github.com/cogentcore/webgpu/wgpu/lib/windows/386"
 	_ "github.com/cogentcore/webgpu/wgpu/lib/windows/amd64"
+	_ "github.com/cogentcore/webgpu/wgpu/lib/windows/arm64"
 )

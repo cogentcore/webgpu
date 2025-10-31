@@ -5,7 +5,7 @@ package wgpu
 /*
 
 #include <stdlib.h>
-#include "./lib/wgpu.h"
+#include <wgpu.h>
 
 */
 import "C"

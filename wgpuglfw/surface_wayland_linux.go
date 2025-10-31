@@ -11,7 +11,7 @@ import (
 
 func GetSurfaceDescriptor(w *glfw.Window) *wgpu.SurfaceDescriptor {
 	return &wgpu.SurfaceDescriptor{
-		WaylandSurface: &wgpu.SurfaceDescriptorFromWaylandSurface{
+		WaylandSurface: &wgpu.SurfaceSourceWaylandSurface{
 			Display: unsafe.Pointer(glfw.GetWaylandDisplay()),
 			Surface: unsafe.Pointer(w.GetWaylandWindow()),
 		},

@@ -72,8 +72,8 @@ func InitState[T interface{ GetSize() (int, int) }](window T, sd *wgpu.SurfaceDe
 	s.queue = s.device.GetQueue()
 
 	shader, err := s.device.CreateShaderModule(&wgpu.ShaderModuleDescriptor{
-		Label:          "shader.wgsl",
-		WGSLDescriptor: &wgpu.ShaderModuleWGSLDescriptor{Code: shader},
+		Label:      "shader.wgsl",
+		WGSLSource: &wgpu.ShaderSourceWGSL{Code: shader},
 	})
 	if err != nil {
 		return s, err

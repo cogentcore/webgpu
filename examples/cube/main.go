@@ -243,7 +243,7 @@ func InitState(window *glfw.Window) (s *State, err error) {
 	s.queue.WriteTexture(
 		texture.AsImageCopy(),
 		wgpu.ToBytes(texels[:]),
-		&wgpu.TextureDataLayout{
+		&wgpu.TexelCopyBufferLayout{
 			Offset:       0,
 			BytesPerRow:  texelsSize,
 			RowsPerImage: wgpu.CopyStrideUndefined,
@@ -262,8 +262,8 @@ func InitState(window *glfw.Window) (s *State, err error) {
 	}
 
 	shader, err := s.device.CreateShaderModule(&wgpu.ShaderModuleDescriptor{
-		Label:          "shader.wgsl",
-		WGSLDescriptor: &wgpu.ShaderModuleWGSLDescriptor{Code: shader},
+		Label:      "shader.wgsl",
+		WGSLSource: &wgpu.ShaderSourceWGSL{Code: shader},
 	})
 	if err != nil {
 		return s, err
