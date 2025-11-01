@@ -36,7 +36,7 @@ func (g Queue) WriteBuffer(buffer *Buffer, offset uint64, data []byte) (err erro
 
 // WriteTexture as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpuqueue-writetexture
-func (g Queue) WriteTexture(destination *ImageCopyTexture, data []byte, dataLayout *TextureDataLayout, writeSize *Extent3D) (err error) {
+func (g Queue) WriteTexture(destination *TexelCopyTextureInfo, data []byte, dataLayout *TexelCopyBufferLayout, writeSize *Extent3D) (err error) {
 	g.jsValue.Call("writeTexture", pointerToJS(destination), jsx.BytesToJS(data), pointerToJS(dataLayout), pointerToJS(writeSize))
 	return
 }

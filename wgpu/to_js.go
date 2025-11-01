@@ -128,7 +128,7 @@ func (g BufferDescriptor) toJS() any {
 	}
 }
 
-func (g *ImageCopyBuffer) toJS() any {
+func (g *TexelCopyBufferInfo) toJS() any {
 	return map[string]any{
 		"buffer":       pointerToJS(g.Buffer),
 		"offset":       g.Layout.Offset,
@@ -137,7 +137,7 @@ func (g *ImageCopyBuffer) toJS() any {
 	}
 }
 
-func (g *ImageCopyTexture) toJS() any {
+func (g *TexelCopyTextureInfo) toJS() any {
 	return map[string]any{
 		"texture":  pointerToJS(g.Texture),
 		"mipLevel": g.MipLevel,
@@ -146,7 +146,7 @@ func (g *ImageCopyTexture) toJS() any {
 	}
 }
 
-func (g *TextureDataLayout) toJS() any {
+func (g *TexelCopyBufferLayout) toJS() any {
 	return map[string]any{
 		"offset":       g.Offset,
 		"bytesPerRow":  g.BytesPerRow,
