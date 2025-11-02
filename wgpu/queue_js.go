@@ -3,7 +3,9 @@
 package wgpu
 
 import (
+	"runtime"
 	"syscall/js"
+	"unsafe"
 
 	"github.com/cogentcore/webgpu/jsx"
 )
@@ -30,14 +32,20 @@ func (g Queue) Submit(commandBuffers ...*CommandBuffer) {
 // WriteBuffer as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpuqueue-writebuffer
 func (g Queue) WriteBuffer(buffer *Buffer, offset uint64, data []byte) (err error) {
-	g.jsValue.Call("writeBuffer", pointerToJS(buffer), offset, jsx.BytesToJS(data), uint64(0), len(data))
+	defer runtime.KeepAlive(data)
+
+	address := uintptr(unsafe.Pointer(&data[0]))
+	queueWriteBuffer.Invoke(g.jsValue, pointerToJS(buffer), offset, address, uint64(0), len(data))
 	return
 }
 
 // WriteTexture as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpuqueue-writetexture
 func (g Queue) WriteTexture(destination *TexelCopyTextureInfo, data []byte, dataLayout *TexelCopyBufferLayout, writeSize *Extent3D) (err error) {
-	g.jsValue.Call("writeTexture", pointerToJS(destination), jsx.BytesToJS(data), pointerToJS(dataLayout), pointerToJS(writeSize))
+	defer runtime.KeepAlive(data)
+
+	address := uintptr(unsafe.Pointer(&data[0]))
+	queueWriteTexture.Invoke(g.jsValue, pointerToJS(destination), address, len(data), pointerToJS(dataLayout), pointerToJS(writeSize))
 	return
 }
 
@@ -49,3 +57,24 @@ func (g Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
 }
 
 func (g Queue) Release() {} // no-op
+
+var queueWriteBuffer js.Value
+var queueWriteTexture js.Value
+
+func init() {
+	queueWriteBuffer = js.Global().Call("eval", `
+		(queue, buf, offset, addr, x, n) => {
+			const mem = wasm.instance.exports.mem.buffer;
+			const data = new Uint8ClampedArray(mem, addr, n);
+			return queue.writeBuffer(buf, offset, data, x, n);
+		} 
+	`)
+
+	queueWriteTexture = js.Global().Call("eval", `
+		(queue, tex, addr, n, layout, writeSize) => {
+			const mem = wasm.instance.exports.mem.buffer;
+			const data = new Uint8ClampedArray(mem, addr, n);
+			return queue.writeTexture(tex, data, layout, writeSize);
+		} 
+	`)
+}
