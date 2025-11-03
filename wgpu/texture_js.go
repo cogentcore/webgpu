@@ -2,7 +2,10 @@
 
 package wgpu
 
-import "syscall/js"
+import (
+	"fmt"
+	"syscall/js"
+)
 
 // TextureView as described:
 // https://gpuweb.github.io/gpuweb/#gputextureview
@@ -29,8 +32,15 @@ func (g Texture) toJS() any {
 // GetFormat as described:
 // https://gpuweb.github.io/gpuweb/#dom-gputexture-format
 func (g Texture) GetFormat() TextureFormat {
-	jsFormat := g.jsValue.Get("format")
-	return TextureFormat(jsFormat.Int()) // TODO(kai): need to set from string
+	jsFormat := g.jsValue.Get("format").String()
+
+	for tf := TextureFormatUndefined + 1; tf.String() != ""; tf++ {
+		if tf.String() == jsFormat {
+			return tf
+		}
+	}
+
+	panic(fmt.Sprintf("unknown texture format %q", jsFormat))
 }
 
 // GetDepthOrArrayLayers as described:
@@ -43,6 +53,24 @@ func (g Texture) GetDepthOrArrayLayers() uint32 {
 // https://gpuweb.github.io/gpuweb/#dom-gputexture-miplevelcount
 func (g Texture) GetMipLevelCount() uint32 {
 	return uint32(g.jsValue.Get("mipLevelCount").Int())
+}
+
+// GetWidth as described:
+// https://gpuweb.github.io/gpuweb/#dom-gputexture-width
+func (g Texture) GetWidth() uint32 {
+	return uint32(g.jsValue.Get("width").Int())
+}
+
+// GetWidth as described:
+// https://gpuweb.github.io/gpuweb/#dom-gputexture-height
+func (g Texture) GetHeight() uint32 {
+	return uint32(g.jsValue.Get("height").Int())
+}
+
+// GetWidth as described:
+// https://gpuweb.github.io/gpuweb/#dom-gputexture-samplecount
+func (g Texture) GetSampleCount() uint32 {
+	return uint32(g.jsValue.Get("sampleCount").Int())
 }
 
 // CreateView as described:
