@@ -36,8 +36,13 @@ func (g Buffer) GetMappedRange(offset, size uint) []byte {
 }
 
 func (g Buffer) MapAsync(mode MapMode, offset uint64, size uint64, callback BufferMapCallback) (err error) {
-	jsx.Await(g.jsValue.Call("mapAsync", uint32(mode), offset, size))
-	callback(MapAsyncStatusSuccess) // TODO(kai): is this the right thing to do?
+	_, ok := jsx.Await(g.jsValue.Call("mapAsync", uint32(mode), offset, size))
+	if !ok {
+		callback(MapAsyncStatusError)
+		return
+	}
+
+	callback(MapAsyncStatusSuccess)
 	return
 }
 
