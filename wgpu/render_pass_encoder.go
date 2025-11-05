@@ -84,7 +84,7 @@ func (p *RenderPassEncoder) End() (err error) {
 	C.gowebgpu_render_pass_encoder_end(
 		p.ref,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }

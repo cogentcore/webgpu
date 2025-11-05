@@ -72,7 +72,7 @@ func (p *Buffer) GetUsage() BufferUsage {
 
 //export gowebgpu_buffer_map_callback_go
 func gowebgpu_buffer_map_callback_go(status C.WGPUMapAsyncStatus, userdata unsafe.Pointer) {
-	handle := *(*cgo.Handle)(userdata)
+	handle := cgo.Handle(userdata)
 	defer handle.Delete()
 
 	cb, ok := handle.Value().(BufferMapCallback)
@@ -97,10 +97,10 @@ func (p *Buffer) MapAsync(mode MapMode, offset uint64, size uint64, callback Buf
 		C.size_t(size),
 		C.WGPUBufferMapCallbackInfo{
 			callback:  C.WGPUBufferMapCallback(C.gowebgpu_buffer_map_callback_c),
-			userdata1: unsafe.Pointer(&callbackHandle),
+			userdata1: unsafe.Pointer(callbackHandle),
 		},
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -115,7 +115,7 @@ func (p *Buffer) Unmap() (err error) {
 	C.gowebgpu_buffer_unmap(
 		p.ref,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }

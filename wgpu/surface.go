@@ -121,7 +121,7 @@ func (p *Surface) GetCurrentTexture() (*Texture, error) {
 	ref := C.gowebgpu_surface_get_current_texture(
 		p.ref,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	if err != nil {
 		if ref != nil {
