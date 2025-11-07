@@ -15,7 +15,11 @@ type ComputePipelineDescriptor struct {
 
 func (g ComputePipelineDescriptor) toJS() any {
 	result := make(map[string]any)
-	result["layout"] = pointerToJS(g.Layout)
+	if g.Layout != nil {
+		result["layout"] = pointerToJS(g.Layout)
+	} else {
+		result["layout"] = "auto"
+	}
 	result["compute"] = g.Compute.toJS()
 	return result
 }
@@ -30,4 +34,9 @@ func (g ComputePipeline) toJS() any {
 	return g.jsValue
 }
 
-func (g ComputePipeline) Release() {} // no-op
+func (g ComputePipeline) Release() {}
+
+func (g ComputePipeline) GetBindGroupLayout(idx int) *BindGroupLayout {
+	jsValue := g.jsValue.Call("getBindGroupLayout", idx)
+	return &BindGroupLayout{jsValue}
+}

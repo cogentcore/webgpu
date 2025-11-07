@@ -123,11 +123,11 @@ func (g Device) CreateSampler(descriptor *SamplerDescriptor) (*Sampler, error) {
 	}, nil
 }
 
-func (g Device) GetLimits() SupportedLimits {
-	return SupportedLimits{limitsFromJS(g.jsValue.Get("limits"))}
+func (g Device) GetLimits() Limits {
+	return limitsFromJS(g.jsValue.Get("limits"))
 }
 
-func (g Device) Poll(wait bool, wrappedSubmissionIndex *WrappedSubmissionIndex) (queueEmpty bool) {
+func (g Device) Poll(wait bool, wrappedSubmissionIndex *uint64) (queueEmpty bool) {
 	return false // no-op
 }
 

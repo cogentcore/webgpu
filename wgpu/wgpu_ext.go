@@ -60,7 +60,19 @@ var (
 
 func (v VertexFormat) Size() uint64 {
 	switch v {
-	case VertexFormatUint8x2,
+	case VertexFormatUint8,
+		VertexFormatSint8,
+		VertexFormatUnorm8,
+		VertexFormatSnorm8:
+		return 1
+
+	case
+		VertexFormatUint16,
+		VertexFormatSint16,
+		VertexFormatUnorm16,
+		VertexFormatSnorm16,
+		VertexFormatFloat16,
+		VertexFormatUint8x2,
 		VertexFormatSint8x2,
 		VertexFormatUnorm8x2,
 		VertexFormatSnorm8x2:

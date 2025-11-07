@@ -76,7 +76,7 @@ func (p *Texture) CreateView(descriptor *TextureViewDescriptor) (*TextureView, e
 		p.ref,
 		desc,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	if err != nil {
 		C.wgpuTextureViewRelease(ref)
