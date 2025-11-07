@@ -5,7 +5,6 @@
 package jsx
 
 import (
-	"log/slog"
 	"syscall/js"
 )
 
@@ -29,7 +28,6 @@ func Await(promise js.Value) (result js.Value, ok bool) {
 	onReject := js.FuncOf(func(this js.Value, args []js.Value) any {
 		result = args[0]
 		ok = false
-		slog.Error("wgpu.AwaitJS: promise rejected", "reason", result)
 		close(done)
 		return nil
 	})
