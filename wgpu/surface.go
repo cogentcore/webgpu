@@ -29,7 +29,6 @@ import "C"
 import (
 	"errors"
 	"runtime"
-	"runtime/cgo"
 	"unsafe"
 )
 
@@ -129,13 +128,13 @@ func (p *Surface) GetCurrentTexture() (*Texture, error) {
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Surface).GetCurrentTexture(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_surface_get_current_texture(
 		p.ref,
 		p.deviceRef,
-		unsafe.Pointer(errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		if ref != nil {

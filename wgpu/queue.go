@@ -43,7 +43,6 @@ static inline void gowebgpu_queue_release(WGPUQueue queue, WGPUDevice device) {
 import "C"
 import (
 	"errors"
-	"runtime/cgo"
 	"unsafe"
 )
 
@@ -54,7 +53,7 @@ type Queue struct {
 
 //export gowebgpu_queue_work_done_callback_go
 func gowebgpu_queue_work_done_callback_go(status C.WGPUQueueWorkDoneStatus, userdata unsafe.Pointer) {
-	handle := cgo.Handle(userdata)
+	handle := lookupHandle(userdata)
 	defer handle.Delete()
 
 	cb, ok := handle.Value().(QueueWorkDoneCallback)
@@ -64,11 +63,11 @@ func gowebgpu_queue_work_done_callback_go(status C.WGPUQueueWorkDoneStatus, user
 }
 
 func (p *Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
-	handle := cgo.NewHandle(callback)
+	handle := newHandle(callback)
 
 	C.wgpuQueueOnSubmittedWorkDone(p.ref, C.WGPUQueueWorkDoneCallbackInfo{
 		callback:  C.WGPUQueueWorkDoneCallback(C.gowebgpu_queue_work_done_callback_c),
-		userdata1: unsafe.Pointer(handle),
+		userdata1: handle.ToPointer(),
 	})
 }
 
@@ -99,7 +98,7 @@ func (p *Queue) WriteBuffer(buffer *Buffer, bufferOffset uint64, data []byte) (e
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Queue).WriteBuffer(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	size := len(data)
@@ -111,7 +110,7 @@ func (p *Queue) WriteBuffer(buffer *Buffer, bufferOffset uint64, data []byte) (e
 			nil,
 			0,
 			p.deviceRef,
-			unsafe.Pointer(errorCallbackHandle),
+			errorCallbackHandle.ToPointer(),
 		)
 		return
 	}
@@ -123,7 +122,7 @@ func (p *Queue) WriteBuffer(buffer *Buffer, bufferOffset uint64, data []byte) (e
 		unsafe.Pointer(&data[0]),
 		C.size_t(size),
 		p.deviceRef,
-		unsafe.Pointer(errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	return
 }
@@ -166,7 +165,7 @@ func (p *Queue) WriteTexture(destination *TexelCopyTextureInfo, data []byte, dat
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Queue).WriteTexture(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	size := len(data)
@@ -179,7 +178,7 @@ func (p *Queue) WriteTexture(destination *TexelCopyTextureInfo, data []byte, dat
 			&layout,
 			&writeExtent,
 			p.deviceRef,
-			unsafe.Pointer(errorCallbackHandle),
+			errorCallbackHandle.ToPointer(),
 		)
 		return
 	}
@@ -192,7 +191,7 @@ func (p *Queue) WriteTexture(destination *TexelCopyTextureInfo, data []byte, dat
 		&layout,
 		&writeExtent,
 		p.deviceRef,
-		unsafe.Pointer(errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	return
 }

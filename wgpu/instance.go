@@ -13,7 +13,6 @@ extern void gowebgpu_request_adapter_callback_c(WGPURequestAdapterStatus status,
 import "C"
 import (
 	"errors"
-	"runtime/cgo"
 	"unsafe"
 )
 
@@ -185,7 +184,7 @@ type requestAdapterCb func(status RequestAdapterStatus, adapter *Adapter, messag
 
 //export gowebgpu_request_adapter_callback_go
 func gowebgpu_request_adapter_callback_go(status C.WGPURequestAdapterStatus, adapter C.WGPUAdapter, message C.WGPUStringView, userdata unsafe.Pointer) {
-	handle := cgo.Handle(userdata)
+	handle := lookupHandle(userdata)
 	defer handle.Delete()
 
 	cb, ok := handle.Value().(requestAdapterCb)
@@ -215,10 +214,10 @@ func (p *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, err
 		status = s
 		adapter = a
 	}
-	handle := cgo.NewHandle(cb)
+	handle := newHandle(cb)
 	C.wgpuInstanceRequestAdapter(p.ref, opts, C.WGPURequestAdapterCallbackInfo{
 		callback:  C.WGPURequestAdapterCallback(C.gowebgpu_request_adapter_callback_c),
-		userdata1: unsafe.Pointer(handle),
+		userdata1: handle.ToPointer(),
 	})
 
 	if status != RequestAdapterStatusSuccess {
