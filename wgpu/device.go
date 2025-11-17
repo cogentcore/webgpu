@@ -178,7 +178,6 @@ static inline WGPUTexture gowebgpu_device_create_texture(WGPUDevice device, WGPU
 import "C"
 import (
 	"errors"
-	"runtime/cgo"
 	"unsafe"
 )
 
@@ -190,7 +189,7 @@ type errorCallback func(typ ErrorType, message string)
 
 //export gowebgpu_error_callback_go
 func gowebgpu_error_callback_go(_type C.WGPUErrorType, message C.WGPUStringView, userdata unsafe.Pointer) {
-	handle := *(*cgo.Handle)(userdata)
+	handle := lookupHandle(userdata)
 	cb, ok := handle.Value().(errorCallback)
 	if ok {
 		cb(ErrorType(_type), C.GoStringN(message.data, C.int(message.length)))
@@ -251,13 +250,13 @@ func (p *Device) CreateBindGroup(descriptor *BindGroupDescriptor) (*BindGroup, e
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreateBindGroup(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_bind_group(
 		p.ref,
 		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuBindGroupRelease(ref)
@@ -356,13 +355,13 @@ func (p *Device) CreateBindGroupLayout(descriptor *BindGroupLayoutDescriptor) (*
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreateBindGroupLayout(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_bind_group_layout(
 		p.ref,
 		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuBindGroupLayoutRelease(ref)
@@ -393,13 +392,13 @@ func (p *Device) CreateBuffer(descriptor *BufferDescriptor) (*Buffer, error) {
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreateBuffer(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_buffer(
 		p.ref,
 		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuBufferRelease(ref)
@@ -429,13 +428,13 @@ func (p *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) (*Co
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreateCommandEncoder(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_command_encoder(
 		p.ref,
 		desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuCommandEncoderRelease(ref)
@@ -491,13 +490,13 @@ func (p *Device) CreateComputePipeline(descriptor *ComputePipelineDescriptor) (*
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreateComputePipeline(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_compute_pipeline(
 		p.ref,
 		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuComputePipelineRelease(ref)
@@ -580,13 +579,13 @@ func (p *Device) CreatePipelineLayout(descriptor *PipelineLayoutDescriptor) (*Pi
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreatePipelineLayout(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_pipeline_layout(
 		p.ref,
 		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuPipelineLayoutRelease(ref)
@@ -636,13 +635,13 @@ func (p *Device) CreateQuerySet(descriptor *QuerySetDescriptor) (*QuerySet, erro
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreateQuerySet(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_query_set(
 		p.ref,
 		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuQuerySetRelease(ref)
@@ -966,13 +965,13 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreateRenderPipeline(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_render_pipeline(
 		p.ref,
 		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuRenderPipelineRelease(ref)
@@ -1012,13 +1011,13 @@ func (p *Device) CreateSampler(descriptor *SamplerDescriptor) (*Sampler, error) 
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreateSampler(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_sampler(
 		p.ref,
 		desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuSamplerRelease(ref)
@@ -1150,13 +1149,13 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreateShaderModule(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_shader_module(
 		p.ref,
 		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuShaderModuleRelease(ref)
@@ -1196,13 +1195,13 @@ func (p *Device) CreateTexture(descriptor *TextureDescriptor) (*Texture, error) 
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Device).CreateTexture(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_texture(
 		p.ref,
 		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuTextureRelease(ref)

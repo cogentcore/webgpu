@@ -27,8 +27,8 @@ func (g Adapter) GetInfo() AdapterInfo {
 	return AdapterInfo{} // TODO(kai): implement?
 }
 
-func (g Adapter) GetLimits() SupportedLimits {
-	return SupportedLimits{limitsFromJS(g.jsValue.Get("limits"))}
+func (g Adapter) GetLimits() Limits {
+	return limitsFromJS(g.jsValue.Get("limits"))
 }
 
 func (g Adapter) Release() {} // no-op
