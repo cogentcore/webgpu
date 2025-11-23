@@ -33,7 +33,6 @@ static inline void gowebgpu_texture_release(WGPUTexture texture, WGPUDevice devi
 import "C"
 import (
 	"errors"
-	"runtime/cgo"
 	"unsafe"
 )
 
@@ -69,14 +68,14 @@ func (p *Texture) CreateView(descriptor *TextureViewDescriptor) (*TextureView, e
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Texture).CreateView(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_texture_create_view(
 		p.ref,
 		desc,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		C.wgpuTextureViewRelease(ref)

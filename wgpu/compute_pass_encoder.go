@@ -30,7 +30,6 @@ static inline void gowebgpu_compute_pass_encoder_release(WGPUComputePassEncoder 
 import "C"
 import (
 	"errors"
-	"runtime/cgo"
 	"unsafe"
 )
 
@@ -55,10 +54,10 @@ func (p *ComputePassEncoder) End() (err error) {
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*ComputePassEncoder).End(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
-	C.gowebgpu_compute_pass_encoder_end(p.ref, p.deviceRef, unsafe.Pointer(&errorCallbackHandle))
+	C.gowebgpu_compute_pass_encoder_end(p.ref, p.deviceRef, errorCallbackHandle.ToPointer())
 	return
 }
 

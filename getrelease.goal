@@ -11,8 +11,8 @@
 
 [mkdir release]
 cd release
-[/bin/rm -rf wgpu-native]
-[/bin/rm -rf zips]
+[/usr/bin/env rm -rf wgpu-native]
+[/usr/bin/env rm -rf zips]
 [mkdir zips]
 git clone https://github.com/gfx-rs/wgpu-native
 cd wgpu-native
@@ -21,7 +21,7 @@ cd ../zips
 zips := goalib.SplitLines($ls -1 "*.zip"$)
 cd ../..
 mv wgpu/lib wgpu/lib_old
-[/bin/rm -rf wgpu/lib]
+[/usr/bin/env rm -rf wgpu/lib]
 mkdir wgpu/lib
 cd wgpu/lib
 for _, f := range zips {
@@ -37,7 +37,7 @@ for _, f := range zips {
 	cd ../
 }
 
-/bin/cp ../lib_old/vendor.go .
+/usr/bin/env cp ../lib_old/vendor.go .
 
 type files struct {
 	zip, trg, arch string
@@ -51,13 +51,12 @@ for _, f := range fls {
 	cd {f.trg}
 	[mkdir {f.arch}]
 	cd {f.arch}
-	[/bin/cp -av {"../../" + f.zip + "/lib/libwgpu_native.a"} .]
+	[/usr/bin/env cp -av {"../../" + f.zip + "/lib/libwgpu_native.a"} .]
 	if f.zip == "windows-aarch64" {
-		/bin/cp -av {"../../" + f.zip + "/lib/wgpu_native.lib"} libwgpu_native.a
+		/usr/bin/env cp -av {"../../" + f.zip + "/lib/wgpu_native.lib"} libwgpu_native.a
 	}
-	/bin/cp -av {"../../" + f.zip + "/include/webgpu/*.h"} .
+	/usr/bin/env cp -av {"../../" + f.zip + "/include/webgpu/*.h"} .
 	goalib.WriteFile("vendor.go", "package vendor")
 	cd ../../
-	/bin/rm -rf {f.zip}
+	/usr/bin/env rm -rf {f.zip}
 }
-

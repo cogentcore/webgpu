@@ -45,21 +45,21 @@ func (g CommandEncoder) CopyBufferToBuffer(source *Buffer, sourceOffset uint64, 
 
 // CopyBufferToTexture as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-copybuffertotexture
-func (g CommandEncoder) CopyBufferToTexture(source *ImageCopyBuffer, destination *ImageCopyTexture, copySize *Extent3D) (err error) {
+func (g CommandEncoder) CopyBufferToTexture(source *TexelCopyBufferInfo, destination *TexelCopyTextureInfo, copySize *Extent3D) (err error) {
 	g.jsValue.Call("copyBufferToTexture", pointerToJS(source), pointerToJS(destination), pointerToJS(copySize))
 	return nil
 }
 
 // CopyTextureToBuffer as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-copytexturetobuffer
-func (g CommandEncoder) CopyTextureToBuffer(source *ImageCopyTexture, destination *ImageCopyBuffer, copySize *Extent3D) (err error) {
+func (g CommandEncoder) CopyTextureToBuffer(source *TexelCopyTextureInfo, destination *TexelCopyBufferInfo, copySize *Extent3D) (err error) {
 	g.jsValue.Call("copyTextureToBuffer", pointerToJS(source), pointerToJS(destination), pointerToJS(copySize))
 	return nil
 }
 
 // CopyTextureToTexture as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpucommandencoder-copytexturetotexture
-func (g CommandEncoder) CopyTextureToTexture(source *ImageCopyTexture, destination *ImageCopyTexture, copySize *Extent3D) (err error) {
+func (g CommandEncoder) CopyTextureToTexture(source *TexelCopyTextureInfo, destination *TexelCopyTextureInfo, copySize *Extent3D) (err error) {
 	g.jsValue.Call("copyTextureToTexture", pointerToJS(source), pointerToJS(destination), pointerToJS(copySize))
 	return nil
 }

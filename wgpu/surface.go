@@ -28,7 +28,7 @@ static inline WGPUTexture gowebgpu_surface_get_current_texture(WGPUSurface surfa
 import "C"
 import (
 	"errors"
-	"runtime/cgo"
+	"runtime"
 	"unsafe"
 )
 
@@ -81,8 +81,24 @@ func (p *Surface) GetCapabilities(adapter *Adapter) (ret SurfaceCapabilities) {
 func (p *Surface) Configure(adapter *Adapter, device *Device, config *SurfaceConfiguration) {
 	p.deviceRef = device.ref
 
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	var cfg *C.WGPUSurfaceConfiguration
 	if config != nil {
+		var nextInChain *C.WGPUSurfaceConfigurationExtras
+
+		if config.DesiredMaximumFrameLatency > 0 {
+			nextInChain = &C.WGPUSurfaceConfigurationExtras{
+				chain: C.WGPUChainedStruct{
+					sType: C.WGPUSType_SurfaceConfigurationExtras,
+				},
+				desiredMaximumFrameLatency: 1,
+			}
+
+			pinner.Pin(nextInChain)
+		}
+
 		cfg = &C.WGPUSurfaceConfiguration{
 			device:      p.deviceRef,
 			format:      C.WGPUTextureFormat(config.Format),
@@ -91,17 +107,14 @@ func (p *Surface) Configure(adapter *Adapter, device *Device, config *SurfaceCon
 			width:       C.uint32_t(config.Width),
 			height:      C.uint32_t(config.Height),
 			presentMode: C.WGPUPresentMode(config.PresentMode),
+			nextInChain: (*C.WGPUChainedStruct)(unsafe.Pointer(nextInChain)),
 		}
-		viewFormatCount := len(config.ViewFormats)
-		if viewFormatCount > 0 {
-			viewFormats := C.malloc(C.size_t(unsafe.Sizeof(C.WGPUTextureFormat(0))) * C.size_t(viewFormatCount))
-			defer C.free(viewFormats)
 
-			viewFormatsSlice := unsafe.Slice((*TextureFormat)(viewFormats), viewFormatCount)
-			copy(viewFormatsSlice, config.ViewFormats)
+		if len(config.ViewFormats) > 0 {
+			pinner.Pin(&config.ViewFormats[0])
 
-			cfg.viewFormatCount = C.size_t(viewFormatCount)
-			cfg.viewFormats = (*C.WGPUTextureFormat)(viewFormats)
+			cfg.viewFormatCount = C.size_t(len(config.ViewFormats))
+			cfg.viewFormats = (*C.WGPUTextureFormat)(&config.ViewFormats[0])
 		}
 	}
 
@@ -115,13 +128,13 @@ func (p *Surface) GetCurrentTexture() (*Texture, error) {
 	var cb errorCallback = func(_ ErrorType, message string) {
 		err = errors.New("wgpu.(*Surface).GetCurrentTexture(): " + message)
 	}
-	errorCallbackHandle := cgo.NewHandle(cb)
+	errorCallbackHandle := newHandle(cb)
 	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_surface_get_current_texture(
 		p.ref,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		errorCallbackHandle.ToPointer(),
 	)
 	if err != nil {
 		if ref != nil {
