@@ -25,7 +25,7 @@ func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 	var desc C.WGPUInstanceDescriptor
 
 	if descriptor != nil {
-		instanceExtras := (*C.WGPUInstanceExtras)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUInstanceExtras{}))))
+		instanceExtras := (*C.WGPUInstanceExtras)(C.calloc(1, C.size_t(unsafe.Sizeof(C.WGPUInstanceExtras{}))))
 		defer C.free(unsafe.Pointer(instanceExtras))
 
 		instanceExtras.chain.next = nil
