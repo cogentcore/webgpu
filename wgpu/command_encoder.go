@@ -205,7 +205,7 @@ func (p *CommandEncoder) ClearBuffer(buffer *Buffer, offset uint64, size uint64)
 		C.uint64_t(offset),
 		C.uint64_t(size),
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -225,7 +225,7 @@ func (p *CommandEncoder) CopyBufferToBuffer(source *Buffer, sourceOffset uint64,
 		C.uint64_t(destinatonOffset),
 		C.uint64_t(size),
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -280,7 +280,7 @@ func (p *CommandEncoder) CopyBufferToTexture(source *ImageCopyBuffer, destinatio
 		&dst,
 		&cpySize,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -335,7 +335,7 @@ func (p *CommandEncoder) CopyTextureToBuffer(source *ImageCopyTexture, destinati
 		&dst,
 		&cpySize,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -394,7 +394,7 @@ func (p *CommandEncoder) CopyTextureToTexture(source *ImageCopyTexture, destinat
 		&dst,
 		&cpySize,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -422,7 +422,7 @@ func (p *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) (*CommandBu
 		p.ref,
 		desc,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	if err != nil {
 		C.wgpuCommandBufferRelease(ref)
@@ -446,7 +446,7 @@ func (p *CommandEncoder) InsertDebugMarker(markerLabel string) (err error) {
 		p.ref,
 		markerLabelStr,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -461,7 +461,7 @@ func (p *CommandEncoder) PopDebugGroup() (err error) {
 	C.gowebgpu_command_encoder_pop_debug_group(
 		p.ref,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -480,7 +480,7 @@ func (p *CommandEncoder) PushDebugGroup(groupLabel string) (err error) {
 		p.ref,
 		groupLabelStr,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -500,7 +500,7 @@ func (p *CommandEncoder) ResolveQuerySet(querySet *QuerySet, firstQuery uint32, 
 		destination.ref,
 		C.uint64_t(destinationOffset),
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -517,7 +517,7 @@ func (p *CommandEncoder) WriteTimestamp(querySet *QuerySet, queryIndex uint32) (
 		querySet.ref,
 		C.uint32_t(queryIndex),
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }

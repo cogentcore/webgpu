@@ -188,7 +188,7 @@ type requestAdapterCb func(status RequestAdapterStatus, adapter *Adapter, messag
 
 //export gowebgpu_request_adapter_callback_go
 func gowebgpu_request_adapter_callback_go(status C.WGPURequestAdapterStatus, adapter C.WGPUAdapter, message *C.char, userdata unsafe.Pointer) {
-	handle := *(*cgo.Handle)(userdata)
+	handle := cgo.Handle(userdata)
 	defer handle.Delete()
 
 	cb, ok := handle.Value().(requestAdapterCb)
@@ -219,7 +219,7 @@ func (p *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, err
 		adapter = a
 	}
 	handle := cgo.NewHandle(cb)
-	C.wgpuInstanceRequestAdapter(p.ref, opts, C.WGPUInstanceRequestAdapterCallback(C.gowebgpu_request_adapter_callback_c), unsafe.Pointer(&handle))
+	C.wgpuInstanceRequestAdapter(p.ref, opts, C.WGPUInstanceRequestAdapterCallback(C.gowebgpu_request_adapter_callback_c), unsafe.Pointer(handle))
 
 	if status != RequestAdapterStatusSuccess {
 		return nil, errors.New("failed to request adapter")
