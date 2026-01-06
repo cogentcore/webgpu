@@ -5,15 +5,22 @@ package wgpu
 /*
 
 #include <stdlib.h>
-#include "./lib/wgpu.h"
+#include <wgpu.h>
 
-extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
+extern void gowebgpu_error_callback_c(enum WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void * userdata, void * userdata2);
 
 static inline WGPUTexture gowebgpu_surface_get_current_texture(WGPUSurface surface, WGPUDevice device, void * error_userdata) {
 	WGPUSurfaceTexture ref;
 	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 	wgpuSurfaceGetCurrentTexture(surface, &ref);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
+
+	WGPUPopErrorScopeCallbackInfo const err_cb = {
+		.callback = gowebgpu_error_callback_c,
+		.userdata1 = error_userdata,
+	};
+
+	wgpuDevicePopErrorScope(device, err_cb);
+
 	return ref.texture;
 }
 
@@ -79,7 +86,7 @@ func (p *Surface) Configure(adapter *Adapter, device *Device, config *SurfaceCon
 		cfg = &C.WGPUSurfaceConfiguration{
 			device:      p.deviceRef,
 			format:      C.WGPUTextureFormat(config.Format),
-			usage:       C.WGPUTextureUsageFlags(config.Usage),
+			usage:       C.WGPUTextureUsage(config.Usage),
 			alphaMode:   C.WGPUCompositeAlphaMode(config.AlphaMode),
 			width:       C.uint32_t(config.Width),
 			height:      C.uint32_t(config.Height),

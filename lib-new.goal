@@ -1,0 +1,8 @@
+#!/usr/bin/env goal
+
+// moves current wgpu/lib to wgpu/lib_old
+// and restores wgpu/lib_new as wgpu/lib
+
+mv wgpu/lib wgpu/lib_old
+mv wgpu/lib_new wgpu/lib
+
