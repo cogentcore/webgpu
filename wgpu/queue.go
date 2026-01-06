@@ -42,7 +42,7 @@ type Queue struct {
 
 //export gowebgpu_queue_work_done_callback_go
 func gowebgpu_queue_work_done_callback_go(status C.WGPUQueueWorkDoneStatus, userdata unsafe.Pointer) {
-	handle := *(*cgo.Handle)(userdata)
+	handle := cgo.Handle(userdata)
 	defer handle.Delete()
 
 	cb, ok := handle.Value().(QueueWorkDoneCallback)
@@ -54,7 +54,7 @@ func gowebgpu_queue_work_done_callback_go(status C.WGPUQueueWorkDoneStatus, user
 func (p *Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
 	handle := cgo.NewHandle(callback)
 
-	C.wgpuQueueOnSubmittedWorkDone(p.ref, C.WGPUQueueOnSubmittedWorkDoneCallback(C.gowebgpu_queue_work_done_callback_c), unsafe.Pointer(&handle))
+	C.wgpuQueueOnSubmittedWorkDone(p.ref, C.WGPUQueueOnSubmittedWorkDoneCallback(C.gowebgpu_queue_work_done_callback_c), unsafe.Pointer(handle))
 }
 
 func (p *Queue) Submit(commands ...*CommandBuffer) (submissionIndex SubmissionIndex) {
@@ -96,7 +96,7 @@ func (p *Queue) WriteBuffer(buffer *Buffer, bufferOffset uint64, data []byte) (e
 			nil,
 			0,
 			p.deviceRef,
-			unsafe.Pointer(&errorCallbackHandle),
+			unsafe.Pointer(errorCallbackHandle),
 		)
 		return
 	}
@@ -108,7 +108,7 @@ func (p *Queue) WriteBuffer(buffer *Buffer, bufferOffset uint64, data []byte) (e
 		unsafe.Pointer(&data[0]),
 		C.size_t(size),
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }
@@ -164,7 +164,7 @@ func (p *Queue) WriteTexture(destination *ImageCopyTexture, data []byte, dataLay
 			&layout,
 			&writeExtent,
 			p.deviceRef,
-			unsafe.Pointer(&errorCallbackHandle),
+			unsafe.Pointer(errorCallbackHandle),
 		)
 		return
 	}
@@ -177,7 +177,7 @@ func (p *Queue) WriteTexture(destination *ImageCopyTexture, data []byte, dataLay
 		&layout,
 		&writeExtent,
 		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
+		unsafe.Pointer(errorCallbackHandle),
 	)
 	return
 }

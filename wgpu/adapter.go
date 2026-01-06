@@ -108,9 +108,8 @@ type requestDeviceCb func(status RequestDeviceStatus, device *Device, message st
 
 //export gowebgpu_request_device_callback_go
 func gowebgpu_request_device_callback_go(status C.WGPURequestDeviceStatus, device C.WGPUDevice, message *C.char, userdata unsafe.Pointer) {
-	handle := *(*cgo.Handle)(userdata)
+	handle := cgo.Handle(userdata)
 	defer handle.Delete()
-
 	cb, ok := handle.Value().(requestDeviceCb)
 	if ok {
 		cb(RequestDeviceStatus(status), &Device{ref: device}, C.GoString(message))
@@ -119,9 +118,8 @@ func gowebgpu_request_device_callback_go(status C.WGPURequestDeviceStatus, devic
 
 //export gowebgpu_device_lost_callback_go
 func gowebgpu_device_lost_callback_go(reason C.WGPUDeviceLostReason, message *C.char, userdata unsafe.Pointer) {
-	handle := *(*cgo.Handle)(userdata)
+	handle := cgo.Handle(userdata)
 	defer handle.Delete()
-
 	cb, ok := handle.Value().(DeviceLostCallback)
 	if ok {
 		cb(DeviceLostReason(reason), C.GoString(message))
@@ -206,7 +204,7 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 			handle := cgo.NewHandle(descriptor.DeviceLostCallback)
 
 			desc.deviceLostCallback = C.WGPUDeviceLostCallback(C.gowebgpu_device_lost_callback_c)
-			desc.deviceLostUserdata = unsafe.Pointer(&handle)
+			desc.deviceLostUserdata = unsafe.Pointer(handle)
 		}
 
 		if descriptor.TracePath != "" {
@@ -233,7 +231,7 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 		device = d
 	}
 	handle := cgo.NewHandle(cb)
-	C.wgpuAdapterRequestDevice(p.ref, desc, C.WGPUAdapterRequestDeviceCallback(C.gowebgpu_request_device_callback_c), unsafe.Pointer(&handle))
+	C.wgpuAdapterRequestDevice(p.ref, desc, C.WGPUAdapterRequestDeviceCallback(C.gowebgpu_request_device_callback_c), unsafe.Pointer(handle))
 
 	if status != RequestDeviceStatusSuccess {
 		return nil, errors.New("failed to request device")

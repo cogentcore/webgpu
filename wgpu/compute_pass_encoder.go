@@ -52,7 +52,7 @@ func (p *ComputePassEncoder) End() (err error) {
 	errorCallbackHandle := cgo.NewHandle(cb)
 	defer errorCallbackHandle.Delete()
 
-	C.gowebgpu_compute_pass_encoder_end(p.ref, p.deviceRef, unsafe.Pointer(&errorCallbackHandle))
+	C.gowebgpu_compute_pass_encoder_end(p.ref, p.deviceRef, unsafe.Pointer(errorCallbackHandle))
 	return
 }
 
