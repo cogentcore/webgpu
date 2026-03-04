@@ -38,6 +38,7 @@ func (p *Adapter) GetLimits() SupportedLimits {
 
 	extras := (*C.WGPUSupportedLimitsExtras)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSupportedLimitsExtras{}))))
 	defer C.free(unsafe.Pointer(extras))
+	*extras = C.WGPUSupportedLimitsExtras{}
 	supportedLimits.nextInChain = (*C.WGPUChainedStructOut)(unsafe.Pointer(extras))
 
 	C.wgpuAdapterGetLimits(p.ref, &supportedLimits)
@@ -156,6 +157,7 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 		if descriptor.RequiredLimits != nil {
 			requiredLimits := (*C.WGPURequiredLimits)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPURequiredLimits{}))))
 			defer C.free(unsafe.Pointer(requiredLimits))
+			*requiredLimits = C.WGPURequiredLimits{}
 
 			l := descriptor.RequiredLimits.Limits
 			requiredLimits.limits = C.WGPULimits{
@@ -194,6 +196,7 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 
 			requiredLimitsExtras := (*C.WGPURequiredLimitsExtras)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPURequiredLimitsExtras{}))))
 			defer C.free(unsafe.Pointer(requiredLimitsExtras))
+			*requiredLimitsExtras = C.WGPURequiredLimitsExtras{}
 
 			requiredLimitsExtras.chain.next = nil
 			requiredLimitsExtras.chain.sType = C.WGPUSType_RequiredLimitsExtras
@@ -212,6 +215,7 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 		if descriptor.TracePath != "" {
 			deviceExtras := (*C.WGPUDeviceExtras)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUDeviceExtras{}))))
 			defer C.free(unsafe.Pointer(deviceExtras))
+			*deviceExtras = C.WGPUDeviceExtras{}
 
 			deviceExtras.chain.next = nil
 			deviceExtras.chain.sType = C.WGPUSType_DeviceExtras
@@ -228,12 +232,15 @@ func (p *Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 	var status RequestDeviceStatus
 	var device *Device
 
+	done := make(chan struct{})
 	var cb requestDeviceCb = func(s RequestDeviceStatus, d *Device, _ string) {
 		status = s
 		device = d
+		close(done)
 	}
 	handle := cgo.NewHandle(cb)
 	C.wgpuAdapterRequestDevice(p.ref, desc, C.WGPUAdapterRequestDeviceCallback(C.gowebgpu_request_device_callback_c), unsafe.Pointer(&handle))
+	<-done
 
 	if status != RequestDeviceStatusSuccess {
 		return nil, errors.New("failed to request device")

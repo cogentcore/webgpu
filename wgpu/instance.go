@@ -27,6 +27,7 @@ func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 	if descriptor != nil {
 		instanceExtras := (*C.WGPUInstanceExtras)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUInstanceExtras{}))))
 		defer C.free(unsafe.Pointer(instanceExtras))
+		*instanceExtras = C.WGPUInstanceExtras{}
 
 		instanceExtras.chain.next = nil
 		instanceExtras.chain.sType = C.WGPUSType_InstanceExtras
@@ -214,12 +215,15 @@ func (p *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, err
 	var status RequestAdapterStatus
 	var adapter *Adapter
 
+	done := make(chan struct{})
 	var cb requestAdapterCb = func(s RequestAdapterStatus, a *Adapter, _ string) {
 		status = s
 		adapter = a
+		close(done)
 	}
 	handle := cgo.NewHandle(cb)
 	C.wgpuInstanceRequestAdapter(p.ref, opts, C.WGPUInstanceRequestAdapterCallback(C.gowebgpu_request_adapter_callback_c), unsafe.Pointer(&handle))
+	<-done
 
 	if status != RequestAdapterStatusSuccess {
 		return nil, errors.New("failed to request adapter")

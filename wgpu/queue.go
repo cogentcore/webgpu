@@ -85,7 +85,6 @@ func (p *Queue) WriteBuffer(buffer *Buffer, bufferOffset uint64, data []byte) (e
 		err = errors.New("wgpu.(*Queue).WriteBuffer(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	size := len(data)
 	if size == 0 {
@@ -152,7 +151,6 @@ func (p *Queue) WriteTexture(destination *ImageCopyTexture, data []byte, dataLay
 		err = errors.New("wgpu.(*Queue).WriteTexture(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	size := len(data)
 	if size == 0 {

@@ -114,9 +114,14 @@ type errorCallback func(typ ErrorType, message string)
 //export gowebgpu_error_callback_go
 func gowebgpu_error_callback_go(_type C.WGPUErrorType, message *C.char, userdata unsafe.Pointer) {
 	handle := *(*cgo.Handle)(userdata)
+	defer handle.Delete()
 	cb, ok := handle.Value().(errorCallback)
 	if ok {
-		cb(ErrorType(_type), C.GoString(message))
+		if message != nil {
+			cb(ErrorType(_type), C.GoString(message))
+		} else {
+			cb(ErrorType(_type), "")
+		}
 	}
 }
 
@@ -174,7 +179,6 @@ func (p *Device) CreateBindGroup(descriptor *BindGroupDescriptor) (*BindGroup, e
 		err = errors.New("wgpu.(*Device).CreateBindGroup(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_bind_group(
 		p.ref,
@@ -278,7 +282,6 @@ func (p *Device) CreateBindGroupLayout(descriptor *BindGroupLayoutDescriptor) (*
 		err = errors.New("wgpu.(*Device).CreateBindGroupLayout(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_bind_group_layout(
 		p.ref,
@@ -314,7 +317,6 @@ func (p *Device) CreateBuffer(descriptor *BufferDescriptor) (*Buffer, error) {
 		err = errors.New("wgpu.(*Device).CreateBuffer(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_buffer(
 		p.ref,
@@ -347,7 +349,6 @@ func (p *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) (*Co
 		err = errors.New("wgpu.(*Device).CreateCommandEncoder(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_command_encoder(
 		p.ref,
@@ -407,7 +408,6 @@ func (p *Device) CreateComputePipeline(descriptor *ComputePipelineDescriptor) (*
 		err = errors.New("wgpu.(*Device).CreateComputePipeline(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_compute_pipeline(
 		p.ref,
@@ -495,7 +495,6 @@ func (p *Device) CreatePipelineLayout(descriptor *PipelineLayoutDescriptor) (*Pi
 		err = errors.New("wgpu.(*Device).CreatePipelineLayout(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_pipeline_layout(
 		p.ref,
@@ -549,7 +548,6 @@ func (p *Device) CreateQuerySet(descriptor *QuerySetDescriptor) (*QuerySet, erro
 		err = errors.New("wgpu.(*Device).CreateQuerySet(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_query_set(
 		p.ref,
@@ -863,7 +861,7 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 				frag.targets = nil
 			}
 			frag.constantCount = 0 // note: crashes on linux arm64 without setting this to 0
-			frag.constants = nil // even though wgpu doesn't even support it.
+			frag.constants = nil   // even though wgpu doesn't even support it.
 
 			desc.fragment = frag
 		}
@@ -874,7 +872,6 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 		err = errors.New("wgpu.(*Device).CreateRenderPipeline(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_render_pipeline(
 		p.ref,
@@ -919,7 +916,6 @@ func (p *Device) CreateSampler(descriptor *SamplerDescriptor) (*Sampler, error) 
 		err = errors.New("wgpu.(*Device).CreateSampler(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_sampler(
 		p.ref,
@@ -1056,7 +1052,6 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 		err = errors.New("wgpu.(*Device).CreateShaderModule(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_shader_module(
 		p.ref,
@@ -1101,7 +1096,6 @@ func (p *Device) CreateTexture(descriptor *TextureDescriptor) (*Texture, error) 
 		err = errors.New("wgpu.(*Device).CreateTexture(): " + message)
 	}
 	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
 
 	ref := C.gowebgpu_device_create_texture(
 		p.ref,
