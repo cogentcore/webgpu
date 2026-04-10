@@ -3,7 +3,7 @@ module github.com/cogentcore/webgpu
 go 1.22
 
 require (
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
+	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1
 	github.com/iancoleman/strcase v0.3.0
 	modernc.org/cc/v3 v3.41.0
 	mvdan.cc/gofumpt v0.6.0

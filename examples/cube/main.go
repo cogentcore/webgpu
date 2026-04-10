@@ -11,7 +11,7 @@ import (
 	"github.com/cogentcore/webgpu/examples/internal/glm"
 	"github.com/cogentcore/webgpu/wgpu"
 	"github.com/cogentcore/webgpu/wgpuglfw"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/glfw/v3.4/glfw"
 
 	_ "embed"
 )
