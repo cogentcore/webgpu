@@ -18,7 +18,6 @@ static inline WGPUTextureView gowebgpu_texture_create_view(WGPUTexture texture, 
 }
 
 static inline void gowebgpu_texture_release(WGPUTexture texture, WGPUDevice device) {
-	wgpuDeviceRelease(device);
 	wgpuTextureRelease(texture);
 }
 

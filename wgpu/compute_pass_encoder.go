@@ -16,7 +16,6 @@ static inline void gowebgpu_compute_pass_encoder_end(WGPUComputePassEncoder comp
 }
 
 static inline void gowebgpu_compute_pass_encoder_release(WGPUComputePassEncoder computePassEncoder, WGPUDevice device) {
-	wgpuDeviceRelease(device);
 	wgpuComputePassEncoderRelease(computePassEncoder);
 }
 

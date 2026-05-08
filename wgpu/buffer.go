@@ -23,7 +23,6 @@ static inline void gowebgpu_buffer_unmap(WGPUBuffer buffer, WGPUDevice device, v
 }
 
 static inline void gowebgpu_buffer_release(WGPUBuffer buffer, WGPUDevice device) {
-	wgpuDeviceRelease(device);
 	wgpuBufferRelease(buffer);
 }
 

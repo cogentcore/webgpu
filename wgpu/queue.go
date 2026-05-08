@@ -23,7 +23,6 @@ static inline void gowebgpu_queue_write_texture(WGPUQueue queue, WGPUImageCopyTe
 }
 
 static inline void gowebgpu_queue_release(WGPUQueue queue, WGPUDevice device) {
-	wgpuDeviceRelease(device);
 	wgpuQueueRelease(queue);
 }
 

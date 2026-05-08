@@ -78,7 +78,6 @@ static inline void gowebgpu_command_encoder_write_timestamp(WGPUCommandEncoder c
 }
 
 static inline void gowebgpu_command_encoder_release(WGPUCommandEncoder commandEncoder, WGPUDevice device) {
-	wgpuDeviceRelease(device);
 	wgpuCommandEncoderRelease(commandEncoder);
 }
 

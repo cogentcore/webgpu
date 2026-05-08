@@ -16,7 +16,6 @@ static inline void gowebgpu_render_pass_encoder_end(WGPURenderPassEncoder render
 }
 
 static inline void gowebgpu_render_pass_encoder_release(WGPURenderPassEncoder renderPassEncoder, WGPUDevice device) {
-	wgpuDeviceRelease(device);
 	wgpuRenderPassEncoderRelease(renderPassEncoder);
 }
 
