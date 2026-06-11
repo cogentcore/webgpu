@@ -3,36 +3,15 @@
 package wgpu
 
 /*
-
 #include <stdlib.h>
 #include "./lib/wgpu.h"
-
-extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
-
-static inline WGPUTextureView gowebgpu_texture_create_view(WGPUTexture texture, WGPUTextureViewDescriptor const * descriptor, WGPUDevice device, void * error_userdata) {
-	WGPUTextureView ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuTextureCreateView(texture, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline void gowebgpu_texture_release(WGPUTexture texture, WGPUDevice device) {
-	wgpuDeviceRelease(device);
-	wgpuTextureRelease(texture);
-}
-
 */
 import "C"
-import (
-	"errors"
-	"runtime/cgo"
-	"unsafe"
-)
 
 type Texture struct {
-	deviceRef C.WGPUDevice
-	ref       C.WGPUTexture
+	deviceRef   C.WGPUDevice
+	instanceRef C.WGPUInstance
+	ref         C.WGPUTexture
 }
 
 func (p *Texture) CreateView(descriptor *TextureViewDescriptor) (*TextureView, error) {
@@ -50,26 +29,16 @@ func (p *Texture) CreateView(descriptor *TextureViewDescriptor) (*TextureView, e
 		}
 
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Texture).CreateView(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_texture_create_view(
-		p.ref,
-		desc,
-		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.deviceRef)
+	ref := C.wgpuTextureCreateView(p.ref, desc)
+	popValidationScope(p.deviceRef, p.instanceRef, "wgpu.(*Texture).CreateView(): ", &err)
 	if err != nil {
 		C.wgpuTextureViewRelease(ref)
 		return nil, err
@@ -115,5 +84,6 @@ func (p *Texture) GetWidth() uint32 {
 }
 
 func (p *Texture) Release() {
-	C.gowebgpu_texture_release(p.ref, p.deviceRef)
+	C.wgpuDeviceRelease(p.deviceRef)
+	C.wgpuTextureRelease(p.ref)
 }

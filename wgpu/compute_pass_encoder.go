@@ -3,34 +3,18 @@
 package wgpu
 
 /*
-
 #include <stdlib.h>
 #include "./lib/wgpu.h"
-
-extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
-
-static inline void gowebgpu_compute_pass_encoder_end(WGPUComputePassEncoder computePassEncoder, WGPUDevice device, void * error_userdata) {
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	wgpuComputePassEncoderEnd(computePassEncoder);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-}
-
-static inline void gowebgpu_compute_pass_encoder_release(WGPUComputePassEncoder computePassEncoder, WGPUDevice device) {
-	wgpuDeviceRelease(device);
-	wgpuComputePassEncoderRelease(computePassEncoder);
-}
-
 */
 import "C"
 import (
-	"errors"
-	"runtime/cgo"
 	"unsafe"
 )
 
 type ComputePassEncoder struct {
-	deviceRef C.WGPUDevice
-	ref       C.WGPUComputePassEncoder
+	deviceRef   C.WGPUDevice
+	instanceRef C.WGPUInstance
+	ref         C.WGPUComputePassEncoder
 }
 
 func (p *ComputePassEncoder) BeginPipelineStatisticsQuery(querySet *QuerySet, queryIndex uint32) {
@@ -45,15 +29,10 @@ func (p *ComputePassEncoder) DispatchWorkgroupsIndirect(indirectBuffer *Buffer, 
 	C.wgpuComputePassEncoderDispatchWorkgroupsIndirect(p.ref, indirectBuffer.ref, C.uint64_t(indirectOffset))
 }
 
-func (p *ComputePassEncoder) End() (err error) {
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*ComputePassEncoder).End(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	C.gowebgpu_compute_pass_encoder_end(p.ref, p.deviceRef, unsafe.Pointer(&errorCallbackHandle))
-	return
+func (p *ComputePassEncoder) End() error {
+	return withDeviceValidation(p.deviceRef, p.instanceRef, "wgpu.(*ComputePassEncoder).End(): ", func() {
+		C.wgpuComputePassEncoderEnd(p.ref)
+	})
 }
 
 func (p *ComputePassEncoder) EndPipelineStatisticsQuery() {
@@ -61,10 +40,9 @@ func (p *ComputePassEncoder) EndPipelineStatisticsQuery() {
 }
 
 func (p *ComputePassEncoder) InsertDebugMarker(markerLabel string) {
-	markerLabelStr := C.CString(markerLabel)
-	defer C.free(unsafe.Pointer(markerLabelStr))
-
-	C.wgpuComputePassEncoderInsertDebugMarker(p.ref, markerLabelStr)
+	label, freeLabel := stringViewOf(markerLabel)
+	defer freeLabel()
+	C.wgpuComputePassEncoderInsertDebugMarker(p.ref, label)
 }
 
 func (p *ComputePassEncoder) PopDebugGroup() {
@@ -72,10 +50,9 @@ func (p *ComputePassEncoder) PopDebugGroup() {
 }
 
 func (p *ComputePassEncoder) PushDebugGroup(groupLabel string) {
-	groupLabelStr := C.CString(groupLabel)
-	defer C.free(unsafe.Pointer(groupLabelStr))
-
-	C.wgpuComputePassEncoderPushDebugGroup(p.ref, groupLabelStr)
+	label, freeLabel := stringViewOf(groupLabel)
+	defer freeLabel()
+	C.wgpuComputePassEncoderPushDebugGroup(p.ref, label)
 }
 
 func (p *ComputePassEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dynamicOffsets []uint32) {
@@ -95,5 +72,6 @@ func (p *ComputePassEncoder) SetPipeline(pipeline *ComputePipeline) {
 }
 
 func (p *ComputePassEncoder) Release() {
-	C.gowebgpu_compute_pass_encoder_release(p.ref, p.deviceRef)
+	C.wgpuDeviceRelease(p.deviceRef)
+	C.wgpuComputePassEncoderRelease(p.ref)
 }

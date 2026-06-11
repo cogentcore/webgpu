@@ -7,8 +7,7 @@ package wgpu
 #include <stdlib.h>
 #include "./lib/wgpu.h"
 
-extern void gowebgpu_request_adapter_callback_c(WGPURequestAdapterStatus status, WGPUAdapter adapter, char const *message, void *userdata);
-
+extern void gowebgpu_request_adapter_callback_c(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message, void* userdata1, void* userdata2);
 */
 import "C"
 import (
@@ -22,7 +21,7 @@ type Instance struct {
 }
 
 func CreateInstance(descriptor *InstanceDescriptor) *Instance {
-	var desc C.WGPUInstanceDescriptor
+	desc := C.WGPUInstanceDescriptor{}
 
 	if descriptor != nil {
 		instanceExtras := (*C.WGPUInstanceExtras)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUInstanceExtras{}))))
@@ -31,18 +30,12 @@ func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 
 		instanceExtras.chain.next = nil
 		instanceExtras.chain.sType = C.WGPUSType_InstanceExtras
-		instanceExtras.backends = C.WGPUInstanceBackendFlags(descriptor.Backends)
+		instanceExtras.backends = C.WGPUInstanceBackend(descriptor.Backends)
 		instanceExtras.dx12ShaderCompiler = C.WGPUDx12Compiler(descriptor.Dx12ShaderCompiler)
 
-		if descriptor.DxilPath != "" {
-			dxilPath := C.CString(descriptor.DxilPath)
-			defer C.free(unsafe.Pointer(dxilPath))
-			instanceExtras.dxilPath = dxilPath
-		}
-
 		if descriptor.DxcPath != "" {
-			dxcPath := C.CString(descriptor.DxcPath)
-			defer C.free(unsafe.Pointer(dxcPath))
+			dxcPath, freeDxcPath := stringViewOf(descriptor.DxcPath)
+			defer freeDxcPath()
 			instanceExtras.dxcPath = dxcPath
 		}
 
@@ -101,18 +94,17 @@ func (p *Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
 
 	if descriptor != nil {
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 
 		if descriptor.WindowsHWND != nil {
-			windowsHWND := (*C.WGPUSurfaceDescriptorFromWindowsHWND)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceDescriptorFromWindowsHWND{}))))
+			windowsHWND := (*C.WGPUSurfaceSourceWindowsHWND)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceSourceWindowsHWND{}))))
 			defer C.free(unsafe.Pointer(windowsHWND))
 
 			windowsHWND.chain.next = nil
-			windowsHWND.chain.sType = C.WGPUSType_SurfaceDescriptorFromWindowsHWND
+			windowsHWND.chain.sType = C.WGPUSType_SurfaceSourceWindowsHWND
 			windowsHWND.hinstance = descriptor.WindowsHWND.Hinstance
 			windowsHWND.hwnd = descriptor.WindowsHWND.Hwnd
 
@@ -120,11 +112,11 @@ func (p *Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
 		}
 
 		if descriptor.XcbWindow != nil {
-			xcbWindow := (*C.WGPUSurfaceDescriptorFromXcbWindow)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceDescriptorFromXcbWindow{}))))
+			xcbWindow := (*C.WGPUSurfaceSourceXCBWindow)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceSourceXCBWindow{}))))
 			defer C.free(unsafe.Pointer(xcbWindow))
 
 			xcbWindow.chain.next = nil
-			xcbWindow.chain.sType = C.WGPUSType_SurfaceDescriptorFromXcbWindow
+			xcbWindow.chain.sType = C.WGPUSType_SurfaceSourceXCBWindow
 			xcbWindow.connection = descriptor.XcbWindow.Connection
 			xcbWindow.window = C.uint32_t(descriptor.XcbWindow.Window)
 
@@ -132,11 +124,11 @@ func (p *Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
 		}
 
 		if descriptor.XlibWindow != nil {
-			xlibWindow := (*C.WGPUSurfaceDescriptorFromXlibWindow)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceDescriptorFromXlibWindow{}))))
+			xlibWindow := (*C.WGPUSurfaceSourceXlibWindow)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceSourceXlibWindow{}))))
 			defer C.free(unsafe.Pointer(xlibWindow))
 
 			xlibWindow.chain.next = nil
-			xlibWindow.chain.sType = C.WGPUSType_SurfaceDescriptorFromXlibWindow
+			xlibWindow.chain.sType = C.WGPUSType_SurfaceSourceXlibWindow
 			xlibWindow.display = descriptor.XlibWindow.Display
 			xlibWindow.window = C.uint64_t(descriptor.XlibWindow.Window)
 
@@ -144,22 +136,22 @@ func (p *Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
 		}
 
 		if descriptor.MetalLayer != nil {
-			metalLayer := (*C.WGPUSurfaceDescriptorFromMetalLayer)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceDescriptorFromMetalLayer{}))))
+			metalLayer := (*C.WGPUSurfaceSourceMetalLayer)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceSourceMetalLayer{}))))
 			defer C.free(unsafe.Pointer(metalLayer))
 
 			metalLayer.chain.next = nil
-			metalLayer.chain.sType = C.WGPUSType_SurfaceDescriptorFromMetalLayer
+			metalLayer.chain.sType = C.WGPUSType_SurfaceSourceMetalLayer
 			metalLayer.layer = descriptor.MetalLayer.Layer
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(metalLayer))
 		}
 
 		if descriptor.WaylandSurface != nil {
-			waylandSurface := (*C.WGPUSurfaceDescriptorFromWaylandSurface)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceDescriptorFromWaylandSurface{}))))
+			waylandSurface := (*C.WGPUSurfaceSourceWaylandSurface)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceSourceWaylandSurface{}))))
 			defer C.free(unsafe.Pointer(waylandSurface))
 
 			waylandSurface.chain.next = nil
-			waylandSurface.chain.sType = C.WGPUSType_SurfaceDescriptorFromWaylandSurface
+			waylandSurface.chain.sType = C.WGPUSType_SurfaceSourceWaylandSurface
 			waylandSurface.display = descriptor.WaylandSurface.Display
 			waylandSurface.surface = descriptor.WaylandSurface.Surface
 
@@ -167,11 +159,11 @@ func (p *Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
 		}
 
 		if descriptor.AndroidNativeWindow != nil {
-			androidNativeWindow := (*C.WGPUSurfaceDescriptorFromAndroidNativeWindow)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceDescriptorFromAndroidNativeWindow{}))))
+			androidNativeWindow := (*C.WGPUSurfaceSourceAndroidNativeWindow)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceSourceAndroidNativeWindow{}))))
 			defer C.free(unsafe.Pointer(androidNativeWindow))
 
 			androidNativeWindow.chain.next = nil
-			androidNativeWindow.chain.sType = C.WGPUSType_SurfaceDescriptorFromAndroidNativeWindow
+			androidNativeWindow.chain.sType = C.WGPUSType_SurfaceSourceAndroidNativeWindow
 			androidNativeWindow.window = descriptor.AndroidNativeWindow.Window
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(androidNativeWindow))
@@ -188,13 +180,15 @@ func (p *Instance) CreateSurface(descriptor *SurfaceDescriptor) *Surface {
 type requestAdapterCb func(status RequestAdapterStatus, adapter *Adapter, message string)
 
 //export gowebgpu_request_adapter_callback_go
-func gowebgpu_request_adapter_callback_go(status C.WGPURequestAdapterStatus, adapter C.WGPUAdapter, message *C.char, userdata unsafe.Pointer) {
-	handle := *(*cgo.Handle)(userdata)
+func gowebgpu_request_adapter_callback_go(status C.WGPURequestAdapterStatus, adapter C.WGPUAdapter, messageData uintptr, messageLen uintptr, userdata2 uintptr) {
+	ptr := unsafe.Pointer(userdata2)
+	handle := *(*cgo.Handle)(ptr)
+	defer freeCgoHandlePtr(ptr)
 	defer handle.Delete()
 
 	cb, ok := handle.Value().(requestAdapterCb)
 	if ok {
-		cb(RequestAdapterStatus(status), &Adapter{ref: adapter}, C.GoString(message))
+		cb(RequestAdapterStatus(status), &Adapter{ref: adapter}, goStringViewFromParts(messageData, messageLen))
 	}
 }
 
@@ -222,12 +216,20 @@ func (p *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, err
 		close(done)
 	}
 	handle := cgo.NewHandle(cb)
-	C.wgpuInstanceRequestAdapter(p.ref, opts, C.WGPUInstanceRequestAdapterCallback(C.gowebgpu_request_adapter_callback_c), unsafe.Pointer(&handle))
+	handlePtr := cgoHandlePtr(handle)
+	cbInfo := C.WGPURequestAdapterCallbackInfo{
+		mode:      C.WGPUCallbackMode_WaitAnyOnly,
+		callback:  C.WGPURequestAdapterCallback(C.gowebgpu_request_adapter_callback_c),
+		userdata2: handlePtr,
+	}
+	future := C.wgpuInstanceRequestAdapter(p.ref, opts, cbInfo)
+	p.waitFuture(future)
 	<-done
 
 	if status != RequestAdapterStatusSuccess {
 		return nil, errors.New("failed to request adapter")
 	}
+	adapter.instanceRef = p.ref
 	return adapter, nil
 }
 
@@ -235,7 +237,7 @@ func (p *Instance) EnumerateAdapters(options *InstanceEnumerateAdapterOptons) []
 	var opts *C.WGPUInstanceEnumerateAdapterOptions
 	if options != nil {
 		opts = &C.WGPUInstanceEnumerateAdapterOptions{
-			backends: C.WGPUInstanceBackendFlags(options.Backends),
+			backends: C.WGPUInstanceBackend(options.Backends),
 		}
 	}
 
@@ -249,7 +251,7 @@ func (p *Instance) EnumerateAdapters(options *InstanceEnumerateAdapterOptons) []
 
 	adapters := make([]*Adapter, size)
 	for i, ref := range adapterRefs {
-		adapters[i] = &Adapter{ref}
+		adapters[i] = &Adapter{ref: ref, instanceRef: p.ref}
 	}
 	return adapters
 }
@@ -258,13 +260,13 @@ type RegistryReport struct {
 	NumAllocated        uint64
 	NumKeptFromUser     uint64
 	NumReleasedFromUser uint64
-	NumError            uint64
 	ElementSize         uint64
 }
 
 type HubReport struct {
 	Adapters         RegistryReport
 	Devices          RegistryReport
+	Queues           RegistryReport
 	PipelineLayouts  RegistryReport
 	ShaderModules    RegistryReport
 	BindGroupLayouts RegistryReport
@@ -273,6 +275,7 @@ type HubReport struct {
 	RenderBundles    RegistryReport
 	RenderPipelines  RegistryReport
 	ComputePipelines RegistryReport
+	PipelineCaches   RegistryReport
 	QuerySets        RegistryReport
 	Buffers          RegistryReport
 	Textures         RegistryReport
@@ -282,11 +285,7 @@ type HubReport struct {
 
 type GlobalReport struct {
 	Surfaces RegistryReport
-	Vulkan   *HubReport
-	Metal    *HubReport
-	Dx12     *HubReport
-	Dx11     *HubReport
-	Gl       *HubReport
+	Hub      HubReport
 }
 
 func (p *Instance) GenerateReport() GlobalReport {
@@ -298,50 +297,33 @@ func (p *Instance) GenerateReport() GlobalReport {
 			NumAllocated:        uint64(creport.numAllocated),
 			NumKeptFromUser:     uint64(creport.numKeptFromUser),
 			NumReleasedFromUser: uint64(creport.numReleasedFromUser),
-			NumError:            uint64(creport.numError),
 			ElementSize:         uint64(creport.elementSize),
 		}
 	}
 
-	mapHubReport := func(creport C.WGPUHubReport) *HubReport {
-		return &HubReport{
-			Adapters:         mapRegistryReport(creport.adapters),
-			Devices:          mapRegistryReport(creport.devices),
-			PipelineLayouts:  mapRegistryReport(creport.pipelineLayouts),
-			ShaderModules:    mapRegistryReport(creport.shaderModules),
-			BindGroupLayouts: mapRegistryReport(creport.bindGroupLayouts),
-			BindGroups:       mapRegistryReport(creport.bindGroups),
-			CommandBuffers:   mapRegistryReport(creport.commandBuffers),
-			RenderBundles:    mapRegistryReport(creport.renderBundles),
-			RenderPipelines:  mapRegistryReport(creport.renderPipelines),
-			ComputePipelines: mapRegistryReport(creport.computePipelines),
-			QuerySets:        mapRegistryReport(creport.querySets),
-			Buffers:          mapRegistryReport(creport.buffers),
-			Textures:         mapRegistryReport(creport.textures),
-			TextureViews:     mapRegistryReport(creport.textureViews),
-			Samplers:         mapRegistryReport(creport.samplers),
-		}
-	}
-
-	report := GlobalReport{
+	hub := r.hub
+	return GlobalReport{
 		Surfaces: mapRegistryReport(r.surfaces),
+		Hub: HubReport{
+			Adapters:         mapRegistryReport(hub.adapters),
+			Devices:          mapRegistryReport(hub.devices),
+			Queues:           mapRegistryReport(hub.queues),
+			PipelineLayouts:  mapRegistryReport(hub.pipelineLayouts),
+			ShaderModules:    mapRegistryReport(hub.shaderModules),
+			BindGroupLayouts: mapRegistryReport(hub.bindGroupLayouts),
+			BindGroups:       mapRegistryReport(hub.bindGroups),
+			CommandBuffers:   mapRegistryReport(hub.commandBuffers),
+			RenderBundles:    mapRegistryReport(hub.renderBundles),
+			RenderPipelines:  mapRegistryReport(hub.renderPipelines),
+			ComputePipelines: mapRegistryReport(hub.computePipelines),
+			PipelineCaches:   mapRegistryReport(hub.pipelineCaches),
+			QuerySets:        mapRegistryReport(hub.querySets),
+			Buffers:          mapRegistryReport(hub.buffers),
+			Textures:         mapRegistryReport(hub.textures),
+			TextureViews:     mapRegistryReport(hub.textureViews),
+			Samplers:         mapRegistryReport(hub.samplers),
+		},
 	}
-
-	switch r.backendType {
-	case C.WGPUBackendType_Vulkan:
-		report.Vulkan = mapHubReport(r.vulkan)
-	case C.WGPUBackendType_Metal:
-		report.Metal = mapHubReport(r.metal)
-	case C.WGPUBackendType_D3D12:
-		report.Dx12 = mapHubReport(r.dx12)
-	// TODO: no longer present in C API
-	// case C.WGPUBackendType_D3D11:
-	// 	report.Dx11 = mapHubReport(r.dx11)
-	case C.WGPUBackendType_OpenGL:
-		report.Gl = mapHubReport(r.gl)
-	}
-
-	return report
 }
 
 func (p *Instance) Release() {
