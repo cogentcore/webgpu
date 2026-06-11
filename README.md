@@ -5,20 +5,20 @@ Go bindings for [WebGPU](https://gpuweb.github.io/gpuweb/), maintained by [openf
 This fork tracks modern **wgpu-native v29** with Go-side bindings (no C compatibility shims). It runs natively on Vulkan, Metal, D3D12, and OpenGL ES, and supports the browser via WASM.
 
 **Module:** `github.com/openfluke/webgpu`  
-**Recommended release:** `v0.1.0` (first openfluke release; ships wgpu-native **v29.0.0.0**)
+**Current release:** `v1.0.0` (ships wgpu-native **v29.0.0.0**)
 
 Forked from [rajveermalviya/go-webgpu](https://github.com/rajveermalviya/go-webgpu) (native) and [mokiat/wasmgpu](https://github.com/mokiat/wasmgpu) (JS/WASM). Upstream credit preserved; API and vendored binaries diverge from those projects.
 
-## Why v0.1.0?
+## Version history
 
 | Tag | What it was |
 |-----|-------------|
-| `v0.0.1` / `v0.0.2` | Initial openfluke fork of the old bindings (~wgpu-native v19 era) |
-| **`v0.1.0`** | **Current line:** full Go migration to the v29 C API + v29 static libs on all platforms |
+| `v0.0.1` / `v0.0.2` | Initial openfluke fork (~wgpu-native v19 era bindings) |
+| **`v1.0.0`** | **Production release:** v29 Go bindings + v29 static libs on all platforms |
 
-This is a **breaking** change vs `v0.0.x` for native (`!js`) code. Bump your `require` and retest GPU paths after upgrading.
+`v1.0.0` is a **breaking** change vs `v0.0.x` for native (`!js`) code. Bump your `require` and retest GPU paths after upgrading.
 
-## What's in v0.1.0
+## What's in v1.0.0
 
 ### wgpu-native v29 stack
 
@@ -46,16 +46,17 @@ Bindings were rewritten for the v29 API instead of using C redirect macros:
 - Push constants → pipeline `immediateDataSize` / `SetImmediates` (native extension)
 - Validation error scopes implemented in Go (`v29.go`)
 
-### Tested with
+### Tested on real hardware
 
-- **loom / lucy** on macOS arm64 + Metal: adapter → device → buffer → GPU forward parity (Apple M5)
+- **macOS arm64 + Metal** — loom / lucy: adapter → device → buffer → GPU forward parity (Apple M5)
+- **Windows arm64** — native wgpu-native v29 static lib; GPU path verified (previously broken on old bindings)
 
 Other platforms have matching v29 libs in-tree; smoke-test on each target you ship.
 
 ## Install
 
 ```bash
-go get github.com/openfluke/webgpu@v0.1.0
+go get github.com/openfluke/webgpu@v1.0.0
 ```
 
 Local development (e.g. from the endgame monorepo):
