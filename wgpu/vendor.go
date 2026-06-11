@@ -3,5 +3,5 @@
 package wgpu
 
 import (
-	_ "github.com/cogentcore/webgpu/wgpu/lib"
+	_ "github.com/openfluke/webgpu/wgpu/lib"
 )

@@ -59,13 +59,10 @@ type RenderBundleDescriptor struct {
 func (p *RenderBundleEncoder) Finish(descriptor *RenderBundleDescriptor) *RenderBundle {
 	var desc *C.WGPURenderBundleDescriptor
 
-	if descriptor != nil {
-		label := C.CString(descriptor.Label)
-		defer C.free(unsafe.Pointer(label))
-
-		desc = &C.WGPURenderBundleDescriptor{
-			label: label,
-		}
+	if descriptor != nil && descriptor.Label != "" {
+		label, freeLabel := stringViewOf(descriptor.Label)
+		defer freeLabel()
+		desc = &C.WGPURenderBundleDescriptor{label: label}
 	}
 
 	ref := C.wgpuRenderBundleEncoderFinish(p.ref, desc)
@@ -76,10 +73,9 @@ func (p *RenderBundleEncoder) Finish(descriptor *RenderBundleDescriptor) *Render
 }
 
 func (p *RenderBundleEncoder) InsertDebugMarker(markerLabel string) {
-	markerLabelStr := C.CString(markerLabel)
-	defer C.free(unsafe.Pointer(markerLabelStr))
-
-	C.wgpuRenderBundleEncoderInsertDebugMarker(p.ref, markerLabelStr)
+	label, freeLabel := stringViewOf(markerLabel)
+	defer freeLabel()
+	C.wgpuRenderBundleEncoderInsertDebugMarker(p.ref, label)
 }
 
 func (p *RenderBundleEncoder) PopDebugGroup() {
@@ -87,10 +83,9 @@ func (p *RenderBundleEncoder) PopDebugGroup() {
 }
 
 func (p *RenderBundleEncoder) PushDebugGroup(groupLabel string) {
-	groupLabelStr := C.CString(groupLabel)
-	defer C.free(unsafe.Pointer(groupLabelStr))
-
-	C.wgpuRenderBundleEncoderPushDebugGroup(p.ref, groupLabelStr)
+	label, freeLabel := stringViewOf(groupLabel)
+	defer freeLabel()
+	C.wgpuRenderBundleEncoderPushDebugGroup(p.ref, label)
 }
 
 func (p *RenderBundleEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dynamicOffsets []uint32) {

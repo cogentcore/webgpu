@@ -5,8 +5,6 @@ package wgpu
 import (
 	"fmt"
 	"syscall/js"
-
-	"github.com/cogentcore/webgpu/jsx"
 )
 
 // Adapter as described:
@@ -16,11 +14,22 @@ type Adapter struct {
 }
 
 func (g Adapter) RequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
-	device, ok := jsx.Await(g.jsValue.Call("requestDevice", pointerToJS(descriptor)))
-	if !ok || !device.Truthy() {
-		return nil, fmt.Errorf("no WebGPU device avaliable")
+
+	device := js.Global().Get("webgpuDevice")
+	if device.IsUndefined() {
+		return nil, fmt.Errorf("WebGPU device not pre-initialized. Call setupWebGPU() in JavaScript first")
 	}
-	return &Device{jsValue: device}, nil
+
+	if !device.Truthy() {
+		return nil, fmt.Errorf("no WebGPU device available")
+	}
+
+	// Also get the queue since Device will need it
+	//queue := js.Global().Get("webgpuQueue")
+
+	return &Device{
+		jsValue: device,
+	}, nil
 }
 
 func (g Adapter) GetInfo() AdapterInfo {

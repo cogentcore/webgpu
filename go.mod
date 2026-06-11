@@ -1,4 +1,4 @@
-module github.com/cogentcore/webgpu
+module github.com/openfluke/webgpu
 
 go 1.22
 

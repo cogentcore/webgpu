@@ -8,10 +8,14 @@ import (
 
 // ComputePassDescriptor as described:
 // https://gpuweb.github.io/gpuweb/#dictdef-gpucomputepassdescriptor
-type ComputePassDescriptor struct{}
+type ComputePassDescriptor struct {
+	Label string
+}
 
 func (g *ComputePassDescriptor) toJS() any {
-	return map[string]any{}
+	return map[string]any{
+		"label": g.Label,
+	}
 }
 
 // ComputePassEncoder as described:

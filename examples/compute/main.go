@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/openfluke/webgpu/wgpu"
 
 	_ "embed"
 )

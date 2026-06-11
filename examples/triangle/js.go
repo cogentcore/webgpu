@@ -6,7 +6,7 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/openfluke/webgpu/wgpu"
 )
 
 type window struct{}

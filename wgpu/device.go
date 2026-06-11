@@ -7,117 +7,15 @@ package wgpu
 #include <stdlib.h>
 #include "./lib/wgpu.h"
 
-extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
-
-static inline WGPUBindGroup gowebgpu_device_create_bind_group(WGPUDevice device, WGPUBindGroupDescriptor const * descriptor, void * error_userdata) {
-	WGPUBindGroup ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreateBindGroup(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline WGPUBindGroupLayout gowebgpu_device_create_bind_group_layout(WGPUDevice device, WGPUBindGroupLayoutDescriptor const * descriptor, void * error_userdata) {
-	WGPUBindGroupLayout ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreateBindGroupLayout(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline WGPUBuffer gowebgpu_device_create_buffer(WGPUDevice device, WGPUBufferDescriptor const * descriptor, void * error_userdata) {
-	WGPUBuffer ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreateBuffer(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline WGPUCommandEncoder gowebgpu_device_create_command_encoder(WGPUDevice device, WGPUCommandEncoderDescriptor const * descriptor, void * error_userdata) {
-	WGPUCommandEncoder ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreateCommandEncoder(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline WGPUComputePipeline gowebgpu_device_create_compute_pipeline(WGPUDevice device, WGPUComputePipelineDescriptor const * descriptor, void * error_userdata) {
-	WGPUComputePipeline ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreateComputePipeline(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline WGPUPipelineLayout gowebgpu_device_create_pipeline_layout(WGPUDevice device, WGPUPipelineLayoutDescriptor const * descriptor, void * error_userdata) {
-	WGPUPipelineLayout ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreatePipelineLayout(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline WGPUQuerySet gowebgpu_device_create_query_set(WGPUDevice device, WGPUQuerySetDescriptor const * descriptor, void * error_userdata) {
-	WGPUQuerySet ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreateQuerySet(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline WGPURenderPipeline gowebgpu_device_create_render_pipeline(WGPUDevice device, WGPURenderPipelineDescriptor const * descriptor, void * error_userdata) {
-	WGPURenderPipeline ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreateRenderPipeline(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline WGPUSampler gowebgpu_device_create_sampler(WGPUDevice device, WGPUSamplerDescriptor const * descriptor, void * error_userdata) {
-	WGPUSampler ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreateSampler(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline WGPUShaderModule gowebgpu_device_create_shader_module(WGPUDevice device, WGPUShaderModuleDescriptor const * descriptor, void * error_userdata) {
-	WGPUShaderModule ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreateShaderModule(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
-static inline WGPUTexture gowebgpu_device_create_texture(WGPUDevice device, WGPUTextureDescriptor const * descriptor, void * error_userdata) {
-	WGPUTexture ref = NULL;
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	ref = wgpuDeviceCreateTexture(device, descriptor);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-	return ref;
-}
-
 */
 import "C"
 import (
-	"errors"
-	"runtime/cgo"
 	"unsafe"
 )
 
 type Device struct {
-	ref C.WGPUDevice
-}
-
-type errorCallback func(typ ErrorType, message string)
-
-//export gowebgpu_error_callback_go
-func gowebgpu_error_callback_go(_type C.WGPUErrorType, message *C.char, userdata unsafe.Pointer) {
-	handle := *(*cgo.Handle)(userdata)
-	cb, ok := handle.Value().(errorCallback)
-	if ok {
-		cb(ErrorType(_type), C.GoString(message))
-	}
+	ref         C.WGPUDevice
+	instanceRef C.WGPUInstance
 }
 
 func (p *Device) Release() { C.wgpuDeviceRelease(p.ref) }
@@ -127,9 +25,8 @@ func (p *Device) CreateBindGroup(descriptor *BindGroupDescriptor) (*BindGroup, e
 
 	if descriptor != nil {
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 
@@ -169,18 +66,10 @@ func (p *Device) CreateBindGroup(descriptor *BindGroupDescriptor) (*BindGroup, e
 		}
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreateBindGroup(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_bind_group(
-		p.ref,
-		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreateBindGroup(p.ref, &desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreateBindGroup(): ", &err)
 	if err != nil {
 		C.wgpuBindGroupRelease(ref)
 		return nil, err
@@ -225,9 +114,8 @@ func (p *Device) CreateBindGroupLayout(descriptor *BindGroupLayoutDescriptor) (*
 
 	if descriptor != nil {
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 
@@ -242,7 +130,7 @@ func (p *Device) CreateBindGroupLayout(descriptor *BindGroupLayoutDescriptor) (*
 				entriesSlice[i] = C.WGPUBindGroupLayoutEntry{
 					nextInChain: nil,
 					binding:     C.uint32_t(v.Binding),
-					visibility:  C.WGPUShaderStageFlags(v.Visibility),
+					visibility:  C.WGPUShaderStage(v.Visibility),
 					buffer: C.WGPUBufferBindingLayout{
 						nextInChain:      nil,
 						_type:            C.WGPUBufferBindingType(v.Buffer.Type),
@@ -273,18 +161,10 @@ func (p *Device) CreateBindGroupLayout(descriptor *BindGroupLayoutDescriptor) (*
 		}
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreateBindGroupLayout(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_bind_group_layout(
-		p.ref,
-		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreateBindGroupLayout(p.ref, &desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreateBindGroupLayout(): ", &err)
 	if err != nil {
 		C.wgpuBindGroupLayoutRelease(ref)
 		return nil, err
@@ -298,69 +178,49 @@ func (p *Device) CreateBuffer(descriptor *BufferDescriptor) (*Buffer, error) {
 
 	if descriptor != nil {
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 
-		desc.usage = C.WGPUBufferUsageFlags(descriptor.Usage)
+		desc.usage = C.WGPUBufferUsage(descriptor.Usage)
 		desc.size = C.uint64_t(descriptor.Size)
 		desc.mappedAtCreation = cBool(descriptor.MappedAtCreation)
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreateBuffer(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_buffer(
-		p.ref,
-		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreateBuffer(p.ref, &desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreateBuffer(): ", &err)
 	if err != nil {
 		C.wgpuBufferRelease(ref)
 		return nil, err
 	}
 
-	C.wgpuDeviceReference(p.ref)
-	return &Buffer{deviceRef: p.ref, ref: ref}, nil
+	C.wgpuDeviceAddRef(p.ref)
+	return &Buffer{deviceRef: p.ref, instanceRef: p.instanceRef, ref: ref}, nil
 }
 
 func (p *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) (*CommandEncoder, error) {
 	var desc *C.WGPUCommandEncoderDescriptor
 
 	if descriptor != nil && descriptor.Label != "" {
-		label := C.CString(descriptor.Label)
-		defer C.free(unsafe.Pointer(label))
-
-		desc = &C.WGPUCommandEncoderDescriptor{
-			label: label,
-		}
+		label, freeLabel := stringViewOf(descriptor.Label)
+		defer freeLabel()
+		desc = &C.WGPUCommandEncoderDescriptor{label: label}
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreateCommandEncoder(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_command_encoder(
-		p.ref,
-		desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreateCommandEncoder(p.ref, desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreateCommandEncoder(): ", &err)
 	if err != nil {
 		C.wgpuCommandEncoderRelease(ref)
 		return nil, err
 	}
 
-	C.wgpuDeviceReference(p.ref)
-	return &CommandEncoder{deviceRef: p.ref, ref: ref}, nil
+	C.wgpuDeviceAddRef(p.ref)
+	return &CommandEncoder{deviceRef: p.ref, instanceRef: p.instanceRef, ref: ref}, nil
 }
 
 type ConstantEntry struct {
@@ -379,9 +239,8 @@ func (p *Device) CreateComputePipeline(descriptor *ComputePipelineDescriptor) (*
 
 	if descriptor != nil {
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 
@@ -389,31 +248,22 @@ func (p *Device) CreateComputePipeline(descriptor *ComputePipelineDescriptor) (*
 			desc.layout = descriptor.Layout.ref
 		}
 
-		var compute C.WGPUProgrammableStageDescriptor
+		compute := C.WGPUComputeState{}
 		if descriptor.Compute.Module != nil {
 			compute.module = descriptor.Compute.Module.ref
 		}
 		if descriptor.Compute.EntryPoint != "" {
-			entryPoint := C.CString(descriptor.Compute.EntryPoint)
-			defer C.free(unsafe.Pointer(entryPoint))
-
+			entryPoint, freeEntryPoint := stringViewOf(descriptor.Compute.EntryPoint)
+			defer freeEntryPoint()
 			compute.entryPoint = entryPoint
 		}
 		desc.compute = compute
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreateComputePipeline(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_compute_pipeline(
-		p.ref,
-		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreateComputePipeline(p.ref, &desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreateComputePipeline(): ", &err)
 	if err != nil {
 		C.wgpuComputePipelineRelease(ref)
 		return nil, err
@@ -439,9 +289,8 @@ func (p *Device) CreatePipelineLayout(descriptor *PipelineLayoutDescriptor) (*Pi
 
 	if descriptor != nil {
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 
@@ -467,22 +316,13 @@ func (p *Device) CreatePipelineLayout(descriptor *PipelineLayoutDescriptor) (*Pi
 			pipelineLayoutExtras.chain.next = nil
 			pipelineLayoutExtras.chain.sType = C.WGPUSType_PipelineLayoutExtras
 
-			pushConstantRangeCount := len(descriptor.PushConstantRanges)
-			pushConstantRanges := C.malloc(C.size_t(pushConstantRangeCount) * C.size_t(unsafe.Sizeof(C.WGPUPushConstantRange{})))
-			defer C.free(pushConstantRanges)
-
-			pushConstantRangesSlice := unsafe.Slice((*C.WGPUPushConstantRange)(pushConstantRanges), pushConstantRangeCount)
-
-			for i, v := range descriptor.PushConstantRanges {
-				pushConstantRangesSlice[i] = C.WGPUPushConstantRange{
-					stages: C.WGPUShaderStageFlags(v.Stages),
-					start:  C.uint32_t(v.Start),
-					end:    C.uint32_t(v.End),
+			var immediateSize uint32
+			for _, v := range descriptor.PushConstantRanges {
+				if v.End > immediateSize {
+					immediateSize = v.End
 				}
 			}
-
-			pipelineLayoutExtras.pushConstantRangeCount = C.size_t(pushConstantRangeCount)
-			pipelineLayoutExtras.pushConstantRanges = (*C.WGPUPushConstantRange)(pushConstantRanges)
+			pipelineLayoutExtras.immediateDataSize = C.uint32_t(immediateSize)
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(pipelineLayoutExtras))
 		} else {
@@ -490,18 +330,10 @@ func (p *Device) CreatePipelineLayout(descriptor *PipelineLayoutDescriptor) (*Pi
 		}
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreatePipelineLayout(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_pipeline_layout(
-		p.ref,
-		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreatePipelineLayout(p.ref, &desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreatePipelineLayout(): ", &err)
 	if err != nil {
 		C.wgpuPipelineLayoutRelease(ref)
 		return nil, err
@@ -522,8 +354,8 @@ func (p *Device) CreateQuerySet(descriptor *QuerySetDescriptor) (*QuerySet, erro
 
 	if descriptor != nil {
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 
@@ -544,18 +376,10 @@ func (p *Device) CreateQuerySet(descriptor *QuerySetDescriptor) (*QuerySet, erro
 		// }
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreateQuerySet(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_query_set(
-		p.ref,
-		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreateQuerySet(p.ref, &desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreateQuerySet(): ", &err)
 	if err != nil {
 		C.wgpuQuerySetRelease(ref)
 		return nil, err
@@ -578,8 +402,8 @@ func (p *Device) CreateRenderBundleEncoder(descriptor *RenderBundleEncoderDescri
 
 	if descriptor != nil {
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 
@@ -691,9 +515,8 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 
 	if descriptor != nil {
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 
@@ -712,9 +535,8 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 			}
 
 			if vertex.EntryPoint != "" {
-				entryPoint := C.CString(vertex.EntryPoint)
-				defer C.free(unsafe.Pointer(entryPoint))
-
+				entryPoint, freeEntryPoint := stringViewOf(vertex.EntryPoint)
+				defer freeEntryPoint()
 				vert.entryPoint = entryPoint
 			}
 
@@ -775,7 +597,7 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 
 			ds.nextInChain = nil
 			ds.format = C.WGPUTextureFormat(depthStencil.Format)
-			ds.depthWriteEnabled = cBool(depthStencil.DepthWriteEnabled)
+			ds.depthWriteEnabled = optionalBool(depthStencil.DepthWriteEnabled)
 			ds.depthCompare = C.WGPUCompareFunction(depthStencil.DepthCompare)
 			ds.stencilFront = C.WGPUStencilFaceState{
 				compare:     C.WGPUCompareFunction(depthStencil.StencilFront.Compare),
@@ -812,9 +634,8 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 
 			frag.nextInChain = nil
 			if fragment.EntryPoint != "" {
-				entryPoint := C.CString(fragment.EntryPoint)
-				defer C.free(unsafe.Pointer(entryPoint))
-
+				entryPoint, freeEntryPoint := stringViewOf(fragment.EntryPoint)
+				defer freeEntryPoint()
 				frag.entryPoint = entryPoint
 			}
 
@@ -832,7 +653,7 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 				for i, v := range fragment.Targets {
 					target := C.WGPUColorTargetState{
 						format:    C.WGPUTextureFormat(v.Format),
-						writeMask: C.WGPUColorWriteMaskFlags(v.WriteMask),
+						writeMask: C.WGPUColorWriteMask(v.WriteMask),
 					}
 
 					if v.Blend != nil {
@@ -863,24 +684,16 @@ func (p *Device) CreateRenderPipeline(descriptor *RenderPipelineDescriptor) (*Re
 				frag.targets = nil
 			}
 			frag.constantCount = 0 // note: crashes on linux arm64 without setting this to 0
-			frag.constants = nil // even though wgpu doesn't even support it.
+			frag.constants = nil   // even though wgpu doesn't even support it.
 
 			desc.fragment = frag
 		}
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreateRenderPipeline(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_render_pipeline(
-		p.ref,
-		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreateRenderPipeline(p.ref, &desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreateRenderPipeline(): ", &err)
 	if err != nil {
 		C.wgpuRenderPipelineRelease(ref)
 		return nil, err
@@ -907,25 +720,16 @@ func (p *Device) CreateSampler(descriptor *SamplerDescriptor) (*Sampler, error) 
 		}
 
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreateSampler(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_sampler(
-		p.ref,
-		desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreateSampler(p.ref, desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreateSampler(): ", &err)
 	if err != nil {
 		C.wgpuSamplerRelease(ref)
 		return nil, err
@@ -956,15 +760,14 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 
 	if descriptor != nil {
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 
 		switch {
 		case descriptor.SPIRVDescriptor != nil:
-			spirv := (*C.WGPUShaderModuleSPIRVDescriptor)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderModuleSPIRVDescriptor{}))))
+			spirv := (*C.WGPUShaderSourceSPIRV)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderSourceSPIRV{}))))
 			defer C.free(unsafe.Pointer(spirv))
 
 			codeSize := len(descriptor.SPIRVDescriptor.Code)
@@ -972,7 +775,7 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 				code := C.CBytes(descriptor.SPIRVDescriptor.Code)
 				defer C.free(code)
 
-				spirv.codeSize = C.uint32_t(codeSize)
+				spirv.codeSize = C.uint32_t(codeSize / 4)
 				spirv.code = (*C.uint32_t)(code)
 			} else {
 				spirv.code = nil
@@ -980,39 +783,37 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 			}
 
 			spirv.chain.next = nil
-			spirv.chain.sType = C.WGPUSType_ShaderModuleSPIRVDescriptor
+			spirv.chain.sType = C.WGPUSType_ShaderSourceSPIRV
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(spirv))
 
 		case descriptor.WGSLDescriptor != nil:
-			wgsl := (*C.WGPUShaderModuleWGSLDescriptor)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderModuleWGSLDescriptor{}))))
+			wgsl := (*C.WGPUShaderSourceWGSL)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderSourceWGSL{}))))
 			defer C.free(unsafe.Pointer(wgsl))
 
 			if descriptor.WGSLDescriptor.Code != "" {
-				code := C.CString(descriptor.WGSLDescriptor.Code)
-				defer C.free(unsafe.Pointer(code))
-
+				code, freeCode := stringViewOf(descriptor.WGSLDescriptor.Code)
+				defer freeCode()
 				wgsl.code = code
 			} else {
-				wgsl.code = nil
+				wgsl.code = emptyStringView()
 			}
 
 			wgsl.chain.next = nil
-			wgsl.chain.sType = C.WGPUSType_ShaderModuleWGSLDescriptor
+			wgsl.chain.sType = C.WGPUSType_ShaderSourceWGSL
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(wgsl))
 
 		case descriptor.GLSLDescriptor != nil:
-			glsl := (*C.WGPUShaderModuleGLSLDescriptor)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderModuleGLSLDescriptor{}))))
+			glsl := (*C.WGPUShaderSourceGLSL)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderSourceGLSL{}))))
 			defer C.free(unsafe.Pointer(glsl))
 
 			if descriptor.GLSLDescriptor.Code != "" {
-				code := C.CString(descriptor.GLSLDescriptor.Code)
-				defer C.free(unsafe.Pointer(code))
-
+				code, freeCode := stringViewOf(descriptor.GLSLDescriptor.Code)
+				defer freeCode()
 				glsl.code = code
 			} else {
-				glsl.code = nil
+				glsl.code = emptyStringView()
 			}
 
 			defineCount := len(descriptor.GLSLDescriptor.Defines)
@@ -1022,19 +823,25 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 
 				shaderDefinesSlice := unsafe.Slice((*C.WGPUShaderDefine)(shaderDefines), defineCount)
 				index := 0
+				frees := make([]func(), 0, defineCount*2)
 
 				for name, value := range descriptor.GLSLDescriptor.Defines {
-					namePtr := C.CString(name)
-					defer C.free(unsafe.Pointer(namePtr))
-					valuePtr := C.CString(value)
-					defer C.free(unsafe.Pointer(valuePtr))
+					nameSV, freeName := stringViewOf(name)
+					frees = append(frees, freeName)
+					valueSV, freeValue := stringViewOf(value)
+					frees = append(frees, freeValue)
 
 					shaderDefinesSlice[index] = C.WGPUShaderDefine{
-						name:  namePtr,
-						value: valuePtr,
+						name:  nameSV,
+						value: valueSV,
 					}
 					index++
 				}
+				defer func() {
+					for _, free := range frees {
+						free()
+					}
+				}()
 
 				glsl.defineCount = C.uint32_t(defineCount)
 				glsl.defines = (*C.WGPUShaderDefine)(shaderDefines)
@@ -1045,24 +852,16 @@ func (p *Device) CreateShaderModule(descriptor *ShaderModuleDescriptor) (*Shader
 
 			glsl.stage = C.WGPUShaderStage(descriptor.GLSLDescriptor.ShaderStage)
 			glsl.chain.next = nil
-			glsl.chain.sType = C.WGPUSType_ShaderModuleGLSLDescriptor
+			glsl.chain.sType = C.WGPUSType_ShaderSourceGLSL
 
 			desc.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(glsl))
 		}
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreateShaderModule(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_shader_module(
-		p.ref,
-		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreateShaderModule(p.ref, &desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreateShaderModule(): ", &err)
 	if err != nil {
 		C.wgpuShaderModuleRelease(ref)
 		return nil, err
@@ -1076,7 +875,7 @@ func (p *Device) CreateTexture(descriptor *TextureDescriptor) (*Texture, error) 
 
 	if descriptor != nil {
 		desc = C.WGPUTextureDescriptor{
-			usage:     C.WGPUTextureUsageFlags(descriptor.Usage),
+			usage:     C.WGPUTextureUsage(descriptor.Usage),
 			dimension: C.WGPUTextureDimension(descriptor.Dimension),
 			size: C.WGPUExtent3D{
 				width:              C.uint32_t(descriptor.Size.Width),
@@ -1089,97 +888,50 @@ func (p *Device) CreateTexture(descriptor *TextureDescriptor) (*Texture, error) 
 		}
 
 		if descriptor.Label != "" {
-			label := C.CString(descriptor.Label)
-			defer C.free(unsafe.Pointer(label))
-
+			label, freeLabel := stringViewOf(descriptor.Label)
+			defer freeLabel()
 			desc.label = label
 		}
 	}
 
-	var err error = nil
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*Device).CreateTexture(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	ref := C.gowebgpu_device_create_texture(
-		p.ref,
-		&desc,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
+	var err error
+	pushValidationScope(p.ref)
+	ref := C.wgpuDeviceCreateTexture(p.ref, &desc)
+	popValidationScope(p.ref, p.instanceRef, "wgpu.(*Device).CreateTexture(): ", &err)
 	if err != nil {
 		C.wgpuTextureRelease(ref)
 		return nil, err
 	}
 
-	C.wgpuDeviceReference(p.ref)
-	return &Texture{deviceRef: p.ref, ref: ref}, nil
+	C.wgpuDeviceAddRef(p.ref)
+	return &Texture{deviceRef: p.ref, instanceRef: p.instanceRef, ref: ref}, nil
 }
 
 func (p *Device) EnumerateFeatures() []FeatureName {
-	size := C.wgpuDeviceEnumerateFeatures(p.ref, nil)
-	if size == 0 {
+	var supported C.WGPUSupportedFeatures
+	C.wgpuDeviceGetFeatures(p.ref, &supported)
+	defer C.wgpuSupportedFeaturesFreeMembers(supported)
+	if supported.featureCount == 0 {
 		return nil
 	}
-
-	features := make([]FeatureName, size)
-	C.wgpuDeviceEnumerateFeatures(p.ref, (*C.WGPUFeatureName)(unsafe.Pointer(&features[0])))
+	features := make([]FeatureName, supported.featureCount)
+	slice := unsafe.Slice((*C.WGPUFeatureName)(unsafe.Pointer(supported.features)), supported.featureCount)
+	for i, f := range slice {
+		features[i] = FeatureName(f)
+	}
 	return features
 }
 
 func (p *Device) GetLimits() SupportedLimits {
-	var supportedLimits C.WGPUSupportedLimits
-
-	extras := (*C.WGPUSupportedLimitsExtras)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSupportedLimitsExtras{}))))
-	defer C.free(unsafe.Pointer(extras))
-	supportedLimits.nextInChain = (*C.WGPUChainedStructOut)(unsafe.Pointer(extras))
-
-	C.wgpuDeviceGetLimits(p.ref, &supportedLimits)
-
-	limits := supportedLimits.limits
-	return SupportedLimits{
-		Limits{
-			MaxTextureDimension1D:                     uint32(limits.maxTextureDimension1D),
-			MaxTextureDimension2D:                     uint32(limits.maxTextureDimension2D),
-			MaxTextureDimension3D:                     uint32(limits.maxTextureDimension3D),
-			MaxTextureArrayLayers:                     uint32(limits.maxTextureArrayLayers),
-			MaxBindGroups:                             uint32(limits.maxBindGroups),
-			MaxBindingsPerBindGroup:                   uint32(limits.maxBindingsPerBindGroup),
-			MaxDynamicUniformBuffersPerPipelineLayout: uint32(limits.maxDynamicUniformBuffersPerPipelineLayout),
-			MaxDynamicStorageBuffersPerPipelineLayout: uint32(limits.maxDynamicStorageBuffersPerPipelineLayout),
-			MaxSampledTexturesPerShaderStage:          uint32(limits.maxSampledTexturesPerShaderStage),
-			MaxSamplersPerShaderStage:                 uint32(limits.maxSamplersPerShaderStage),
-			MaxStorageBuffersPerShaderStage:           uint32(limits.maxStorageBuffersPerShaderStage),
-			MaxStorageTexturesPerShaderStage:          uint32(limits.maxStorageTexturesPerShaderStage),
-			MaxUniformBuffersPerShaderStage:           uint32(limits.maxUniformBuffersPerShaderStage),
-			MaxUniformBufferBindingSize:               uint64(limits.maxUniformBufferBindingSize),
-			MaxStorageBufferBindingSize:               uint64(limits.maxStorageBufferBindingSize),
-			MinUniformBufferOffsetAlignment:           uint32(limits.minUniformBufferOffsetAlignment),
-			MinStorageBufferOffsetAlignment:           uint32(limits.minStorageBufferOffsetAlignment),
-			MaxVertexBuffers:                          uint32(limits.maxVertexBuffers),
-			MaxBufferSize:                             uint64(limits.maxBufferSize),
-			MaxVertexAttributes:                       uint32(limits.maxVertexAttributes),
-			MaxVertexBufferArrayStride:                uint32(limits.maxVertexBufferArrayStride),
-			MaxInterStageShaderComponents:             uint32(limits.maxInterStageShaderComponents),
-			MaxInterStageShaderVariables:              uint32(limits.maxInterStageShaderVariables),
-			MaxColorAttachments:                       uint32(limits.maxColorAttachments),
-			MaxComputeWorkgroupStorageSize:            uint32(limits.maxComputeWorkgroupStorageSize),
-			MaxComputeInvocationsPerWorkgroup:         uint32(limits.maxComputeInvocationsPerWorkgroup),
-			MaxComputeWorkgroupSizeX:                  uint32(limits.maxComputeWorkgroupSizeX),
-			MaxComputeWorkgroupSizeY:                  uint32(limits.maxComputeWorkgroupSizeY),
-			MaxComputeWorkgroupSizeZ:                  uint32(limits.maxComputeWorkgroupSizeZ),
-			MaxComputeWorkgroupsPerDimension:          uint32(limits.maxComputeWorkgroupsPerDimension),
-
-			MaxPushConstantSize: uint32(extras.limits.maxPushConstantSize),
-		},
-	}
+	var limits C.WGPULimits
+	C.wgpuDeviceGetLimits(p.ref, &limits)
+	return SupportedLimits{limitsFromC(limits)}
 }
 
 func (p *Device) GetQueue() *Queue {
 	ref := C.wgpuDeviceGetQueue(p.ref)
-	C.wgpuDeviceReference(p.ref)
-	return &Queue{deviceRef: p.ref, ref: ref}
+	C.wgpuDeviceAddRef(p.ref)
+	return &Queue{deviceRef: p.ref, instanceRef: p.instanceRef, ref: ref}
 }
 
 func (p *Device) HasFeature(feature FeatureName) bool {
@@ -1188,12 +940,10 @@ func (p *Device) HasFeature(feature FeatureName) bool {
 }
 
 func (p *Device) Poll(wait bool, wrappedSubmissionIndex *WrappedSubmissionIndex) (queueEmpty bool) {
-	var index *C.WGPUWrappedSubmissionIndex
+	var index *C.WGPUSubmissionIndex
 	if wrappedSubmissionIndex != nil {
-		index = &C.WGPUWrappedSubmissionIndex{
-			queue:           wrappedSubmissionIndex.Queue.ref,
-			submissionIndex: C.WGPUSubmissionIndex(wrappedSubmissionIndex.SubmissionIndex),
-		}
+		submissionIndex := C.WGPUSubmissionIndex(wrappedSubmissionIndex.SubmissionIndex)
+		index = &submissionIndex
 	}
 
 	return goBool(C.wgpuDevicePoll(p.ref, cBool(wait), index))

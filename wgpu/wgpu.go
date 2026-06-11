@@ -26,7 +26,7 @@ package wgpu
 #cgo darwin,!ios,amd64 LDFLAGS: -L${SRCDIR}/lib/darwin/amd64 -lwgpu_native
 #cgo darwin,!ios,arm64 LDFLAGS: -L${SRCDIR}/lib/darwin/arm64 -lwgpu_native
 
-#cgo darwin LDFLAGS: -framework QuartzCore -framework Metal
+#cgo darwin LDFLAGS: -framework QuartzCore -framework Metal -framework Foundation
 
 // Windows
 #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/lib/windows/amd64 -lwgpu_native

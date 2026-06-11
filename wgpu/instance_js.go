@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log"
 	"syscall/js"
-
-	"github.com/cogentcore/webgpu/jsx"
 )
 
 // Instance as described:
@@ -27,11 +25,17 @@ func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 }
 
 func (g Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, error) {
-	adapter, ok := jsx.Await(g.jsValue.Call("requestAdapter", pointerToJS(options)))
-	if !ok || !adapter.Truthy() {
-		return nil, fmt.Errorf("no WebGPU adapter avaliable")
+	// Simple WASM fix - require pre-initialization
+	preAdapter := js.Global().Get("webgpuAdapter")
+	if preAdapter.IsUndefined() {
+		return nil, fmt.Errorf("WebGPU adapter not pre-initialized. Call setupWebGPU() in JavaScript first")
 	}
-	return &Adapter{jsValue: adapter}, nil
+
+	if !preAdapter.Truthy() {
+		return nil, fmt.Errorf("no WebGPU adapter available")
+	}
+
+	return &Adapter{jsValue: preAdapter}, nil
 }
 
 func (g Instance) EnumerateAdapters(options *InstanceEnumerateAdapterOptons) []*Adapter {

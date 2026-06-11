@@ -5,7 +5,7 @@ package wgpu
 import (
 	"syscall/js"
 
-	"github.com/cogentcore/webgpu/jsx"
+	"github.com/openfluke/webgpu/jsx"
 )
 
 // Queue as described:
@@ -44,8 +44,24 @@ func (g Queue) WriteTexture(destination *ImageCopyTexture, data []byte, dataLayo
 // OnSubmittedWorkDone as described:
 // https://gpuweb.github.io/gpuweb/#dom-gpuqueue-onsubmittedworkdone
 func (g Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
-	jsx.Await(g.jsValue.Call("onSubmittedWorkDone")) // TODO(kai): is this correct?
-	callback(QueueWorkDoneStatusSuccess)
+	// Don't use jsx.Await - handle promise with callbacks
+
+	promise := g.jsValue.Call("onSubmittedWorkDone")
+
+	// Set up success handler
+	successCallback := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		callback(QueueWorkDoneStatusSuccess)
+		return nil
+	})
+
+	// Set up error handler
+	errorCallback := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		callback(QueueWorkDoneStatusError) // or whatever error status you have
+		return nil
+	})
+
+	// Handle the promise
+	promise.Call("then", successCallback).Call("catch", errorCallback)
 }
 
 func (g Queue) Release() {} // no-op

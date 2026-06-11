@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cogentcore/webgpu/wgpu"
-	"github.com/cogentcore/webgpu/wgpuglfw"
+	"github.com/openfluke/webgpu/wgpu"
+	"github.com/openfluke/webgpu/wgpuglfw"
 	"github.com/go-gl/glfw/v3.3/glfw"
 
 	_ "embed"

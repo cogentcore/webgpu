@@ -6,7 +6,7 @@ import (
 	"os"
 	"unsafe"
 
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/openfluke/webgpu/wgpu"
 )
 
 var forceFallbackAdapter = os.Getenv("WGPU_FORCE_FALLBACK_ADAPTER") == "1"

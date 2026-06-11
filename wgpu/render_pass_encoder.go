@@ -7,29 +7,15 @@ package wgpu
 #include <stdlib.h>
 #include "./lib/wgpu.h"
 
-extern void gowebgpu_error_callback_c(WGPUErrorType type, char const * message, void * userdata);
-
-static inline void gowebgpu_render_pass_encoder_end(WGPURenderPassEncoder renderPassEncoder, WGPUDevice device, void * error_userdata) {
-	wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
-	wgpuRenderPassEncoderEnd(renderPassEncoder);
-	wgpuDevicePopErrorScope(device, gowebgpu_error_callback_c, error_userdata);
-}
-
-static inline void gowebgpu_render_pass_encoder_release(WGPURenderPassEncoder renderPassEncoder, WGPUDevice device) {
-	wgpuDeviceRelease(device);
-	wgpuRenderPassEncoderRelease(renderPassEncoder);
-}
-
 */
 import "C"
 import (
-	"errors"
-	"runtime/cgo"
 	"unsafe"
 )
 
 type RenderPassEncoder struct {
-	deviceRef C.WGPUDevice
+	deviceRef   C.WGPUDevice
+	instanceRef C.WGPUInstance
 	ref       C.WGPURenderPassEncoder
 }
 
@@ -68,19 +54,10 @@ func (p *RenderPassEncoder) DrawIndirect(indirectBuffer *Buffer, indirectOffset 
 	C.wgpuRenderPassEncoderDrawIndirect(p.ref, indirectBuffer.ref, C.uint64_t(indirectOffset))
 }
 
-func (p *RenderPassEncoder) End() (err error) {
-	var cb errorCallback = func(_ ErrorType, message string) {
-		err = errors.New("wgpu.(*RenderPassEncoder).End(): " + message)
-	}
-	errorCallbackHandle := cgo.NewHandle(cb)
-	defer errorCallbackHandle.Delete()
-
-	C.gowebgpu_render_pass_encoder_end(
-		p.ref,
-		p.deviceRef,
-		unsafe.Pointer(&errorCallbackHandle),
-	)
-	return
+func (p *RenderPassEncoder) End() error {
+	return withDeviceValidation(p.deviceRef, p.instanceRef, "wgpu.(*RenderPassEncoder).End(): ", func() {
+		C.wgpuRenderPassEncoderEnd(p.ref)
+	})
 }
 
 func (p *RenderPassEncoder) EndOcclusionQuery() {
@@ -110,10 +87,9 @@ func (p *RenderPassEncoder) ExecuteBundles(bundles ...*RenderBundle) {
 }
 
 func (p *RenderPassEncoder) InsertDebugMarker(markerLabel string) {
-	markerLabelStr := C.CString(markerLabel)
-	defer C.free(unsafe.Pointer(markerLabelStr))
-
-	C.wgpuRenderPassEncoderInsertDebugMarker(p.ref, markerLabelStr)
+	label, freeLabel := stringViewOf(markerLabel)
+	defer freeLabel()
+	C.wgpuRenderPassEncoderInsertDebugMarker(p.ref, label)
 }
 
 func (p *RenderPassEncoder) PopDebugGroup() {
@@ -121,10 +97,9 @@ func (p *RenderPassEncoder) PopDebugGroup() {
 }
 
 func (p *RenderPassEncoder) PushDebugGroup(groupLabel string) {
-	groupLabelStr := C.CString(groupLabel)
-	defer C.free(unsafe.Pointer(groupLabelStr))
-
-	C.wgpuRenderPassEncoderPushDebugGroup(p.ref, groupLabelStr)
+	label, freeLabel := stringViewOf(groupLabel)
+	defer freeLabel()
+	C.wgpuRenderPassEncoderPushDebugGroup(p.ref, label)
 }
 
 func (p *RenderPassEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dynamicOffsets []uint32) {
@@ -208,22 +183,13 @@ func (p *RenderPassEncoder) SetViewport(x, y, width, height, minDepth, maxDepth 
 	)
 }
 
-func (p *RenderPassEncoder) SetPushConstants(stages ShaderStage, offset uint32, data []byte) {
+func (p *RenderPassEncoder) SetPushConstants(_ ShaderStage, offset uint32, data []byte) {
 	size := len(data)
 	if size == 0 {
-		C.wgpuRenderPassEncoderSetPushConstants(
-			p.ref,
-			C.WGPUShaderStageFlags(stages),
-			C.uint32_t(offset),
-			0,
-			nil,
-		)
 		return
 	}
-
-	C.wgpuRenderPassEncoderSetPushConstants(
+	C.wgpuRenderPassEncoderSetImmediates(
 		p.ref,
-		C.WGPUShaderStageFlags(stages),
 		C.uint32_t(offset),
 		C.uint32_t(size),
 		unsafe.Pointer(&data[0]),
@@ -271,5 +237,6 @@ func (p *RenderPassEncoder) MultiDrawIndexedIndirectCount(encoder *RenderPassEnc
 }
 
 func (p *RenderPassEncoder) Release() {
-	C.gowebgpu_render_pass_encoder_release(p.ref, p.deviceRef)
+	C.wgpuDeviceRelease(p.deviceRef)
+	C.wgpuRenderPassEncoderRelease(p.ref)
 }

@@ -4,7 +4,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/openfluke/webgpu/wgpu"
 
 	_ "embed"
 )
