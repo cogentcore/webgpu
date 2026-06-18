@@ -1,5 +1,11 @@
 # WebGPU
 
+**IMPORTANT:** please use https://github.com/oliverbestmann/webgpu as the currently-maintained fork of this original code!!
+
+This repository is being maintained in its original state for the dependencies that used it, but will not be updated.
+
+## Original info
+
 Go bindings for WebGPU, a cross-platform, safe graphics API. It runs natively using [wgpu-native](https://github.com/gfx-rs/wgpu-native) on Vulkan, Metal, D3D12, and OpenGL ES based on https://github.com/rajveermalviya/go-webgpu. It also comes with web (JS) support based on https://github.com/mokiat/wasmgpu.
 
 For more information, see:
@@ -26,3 +32,4 @@ The included static libraries are built via [GitHub Actions](.github/workflows/b
 ## Sponsors
 
 We thank Michael Reinstein and our other [sponsors](https://github.com/sponsors/cogentcore) for their support, which allows us to spend more time improving Cogent Core and Go WebGPU.
+
